@@ -1,0 +1,2170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BTS">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#c8b898">
+
+
+<title>Banana Tower Shift</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
+html,body{width:100%;height:100%;overflow:hidden;background:#b8a888;font-family:'Courier New',Courier,monospace;}
+
+#device{
+  position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:radial-gradient(ellipse at 45% 35%,#ddd0b0 0%,#b8a888 100%);
+  padding:env(safe-area-inset-top,0) env(safe-area-inset-right,0) env(safe-area-inset-bottom,0) env(safe-area-inset-left,0);
+}
+#ds-body{position:relative;display:flex;flex-direction:column;align-items:center;}
+
+#top-casing{
+  background:linear-gradient(165deg,#f0ead8 0%,#ddd0b8 55%,#ccc0a8 100%);
+  border-radius:18px 18px 5px 5px;padding:10px 12px 7px;
+  box-shadow:0 -2px 0 #ede0c8,inset 0 2px 5px rgba(255,255,255,.6),inset 0 -1px 3px rgba(0,0,0,.12),0 4px 0 #a89880;
+}
+#top-screen-bezel{background:#111;border-radius:8px;padding:6px;box-shadow:inset 0 0 14px rgba(0,0,0,.9),0 0 0 1px #2a2a2a;}
+#top-canvas-wrap{position:relative;overflow:hidden;border-radius:3px;}
+
+#hinge{
+  width:100%;height:13px;
+  background:linear-gradient(180deg,#a89880 0%,#ccc0ac 45%,#a89880 100%);
+  display:flex;align-items:center;justify-content:space-between;padding:0 8px;z-index:10;
+}
+#hinge::before,#hinge::after{content:'';width:28px;height:10px;background:linear-gradient(180deg,#b8ac9c,#988c7c);border-radius:5px;box-shadow:inset 0 1px 2px rgba(255,255,255,.4),0 1px 2px rgba(0,0,0,.3);}
+
+#bottom-casing{
+  background:linear-gradient(170deg,#ddd0b8 0%,#ccc0ac 40%,#bcb09c 100%);
+  border-radius:5px 5px 26px 26px;padding:7px 12px 20px;
+  box-shadow:inset 0 -2px 6px rgba(0,0,0,.1),0 8px 0 #a09080,0 14px 22px rgba(0,0,0,.38);
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  position:relative;
+}
+#bottom-screen-bezel{background:#111;border-radius:7px;padding:5px;box-shadow:inset 0 0 12px rgba(0,0,0,.9),0 0 0 1px #2a2a2a;}
+#bottom-canvas-wrap{position:relative;overflow:hidden;border-radius:3px;}
+
+#controls-row{width:100%;display:flex;align-items:center;justify-content:space-between;padding:2px 2px;gap:8px;}
+.timer-badge{font-size:15px;font-weight:bold;letter-spacing:.5px;padding:5px 9px;border-radius:7px;font-family:'Courier New',monospace;min-width:80px;text-align:center;flex-shrink:0;}
+/* (monkey/work badges removed from controls row) */
+
+#center-top{display:flex;align-items:center;justify-content:center;flex:1;}
+#total-badge{font-size:16px;min-width:96px;padding:6px 10px;border-radius:9px;background:#2a240f;color:#f8d800;border:2px solid #7a6a2a;}
+
+#switch-btn{background:linear-gradient(180deg,#cc3030,#881818);color:#ffe8e8;border:none;border-radius:22px;width:110px;height:42px;font-family:'Courier New',monospace;font-size:14px;font-weight:bold;cursor:pointer;box-shadow:0 5px 0 #440000,inset 0 1px 0 rgba(255,200,200,.4);transition:transform .05s,box-shadow .05s;}
+#switch-btn:active{transform:translateY(3px);box-shadow:0 1px 0 #440000;}
+
+#btn-row{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;}
+.sys-btn{background:linear-gradient(180deg,#ccc0a0,#aca080);color:#5a4a30;border:none;border-radius:16px;height:28px;padding:0 12px;font-family:'Courier New',monospace;font-size:11px;font-weight:bold;cursor:pointer;letter-spacing:.5px;box-shadow:0 3px 0 #887060,inset 0 1px 0 rgba(255,255,255,.5);transition:transform .05s,box-shadow .05s;display:flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap;line-height:1;}
+.sys-btn:active{transform:translateY(2px);box-shadow:0 1px 0 #887060;}
+#pause-btn{background:linear-gradient(180deg,#6090c8,#3060a0);color:#e0f0ff;box-shadow:0 3px 0 #204070;width:80px;}
+#pause-btn.paused{background:linear-gradient(180deg,#c09030,#906010);color:#fff0c0;box-shadow:0 3px 0 #604010;}
+.btn-ico{display:inline-block;line-height:1;transform:translateY(-0.5px);}
+.btn-txt{display:inline-block;line-height:1;}
+
+.screen-overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:12px;z-index:300;text-align:center;}
+.screen-overlay.hidden{display:none;}
+
+/* Setup overlay – GBC style */
+#setup-ov{background:#0a1a0a;color:#88dd66;}
+.ov-title{font-size:13px;font-weight:bold;line-height:1.8;color:#aaffbb;letter-spacing:1px;}
+.ov-sub{font-size:10px;color:#559933;line-height:2.2;}
+.time-selector{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;}
+.time-opt{background:#162a16;color:#88ee88;border:2px solid #2a6030;padding:6px 10px;font-family:'Courier New',monospace;font-size:11px;border-radius:5px;cursor:pointer;font-weight:bold;}
+.time-opt.sel,.time-opt:hover{background:#2a6030;color:#ccffcc;border-color:#4aaa50;}
+.go-btn{background:linear-gradient(180deg,#30aa30,#186018);color:#aaffaa;border:none;padding:9px 24px;border-radius:7px;font-family:'Courier New',monospace;font-size:13px;font-weight:bold;cursor:pointer;letter-spacing:1px;box-shadow:0 4px 0 #0a3010;}
+.go-btn:active{transform:translateY(2px);}
+
+/* End overlay */
+#end-ov{background:#0a1a0a;color:#88dd66;}
+.end-score{font-size:11px;color:#88ee88;line-height:2.2;white-space:pre-line;font-weight:bold;}
+.end-emoji{font-size:36px;font-family:sans-serif;}
+.end-title-txt{font-size:14px;font-weight:bold;color:#aaffbb;letter-spacing:1px;}
+
+#likes-overlay{
+  position:absolute;bottom:18px;left:50%;transform:translateX(-50%);
+  display:none;flex-direction:column;align-items:center;gap:6px;
+  z-index:200;pointer-events:auto;white-space:nowrap;
+}
+#likes-overlay.visible{display:flex;}
+#likes-btn{
+  background:linear-gradient(180deg,#e05080,#a02050);color:#ffe0ec;
+  border:none;border-radius:16px;height:32px;padding:0 18px;
+  font-family:'Courier New',monospace;font-size:14px;font-weight:bold;
+  cursor:pointer;letter-spacing:.5px;
+  box-shadow:0 3px 0 #600030,inset 0 1px 0 rgba(255,255,255,.3);
+  transition:transform .05s,box-shadow .05s;
+}
+#likes-btn:active{transform:translateY(2px);box-shadow:0 1px 0 #600030;}
+#likes-count{font-family:'Courier New',monospace;font-size:13px;font-weight:bold;color:#88ee88;text-shadow:0 1px 3px #000;}
+
+
+</style>
+</head>
+<body>
+<div id="device">
+  <div id="ds-body">
+    <div id="top-casing">
+      <div id="top-screen-bezel">
+        <div id="top-canvas-wrap">
+          <canvas id="top-cv"></canvas>
+          <div id="likes-overlay">
+            <button id="likes-btn" onclick="sendLike()">❤️ LIKE</button>
+            <div id="likes-count">❤️ ... people like this</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="hinge"></div>
+    <div id="bottom-casing">
+      <div id="bottom-screen-bezel">
+        <div id="bottom-canvas-wrap">
+          <canvas id="bot-cv"></canvas>
+          <div class="screen-overlay" id="setup-ov">
+            <div class="ov-title">🍌 BANANA<br>TOWER SHIFT</div>
+            <div class="ov-sub">Select work goal time</div>
+            <div class="time-selector">
+              <button class="time-opt" data-min="10">10m</button>
+              <button class="time-opt sel" data-min="30">30m</button>
+              <button class="time-opt" data-min="45">45m</button>
+              <button class="time-opt" data-min="60">60m</button>
+              <button class="time-opt" data-min="90">90m</button>
+            </div>
+            <button class="go-btn" id="go-btn">▶ START</button>
+          </div>
+          <div class="screen-overlay hidden" id="end-ov">
+            <div class="end-emoji" id="end-emoji">🏰</div>
+            <div class="end-title-txt" id="end-title">COMPLETE!</div>
+            <div class="end-score" id="end-score"></div>
+            <button class="go-btn" onclick="resetGame()">▶ RETRY</button>
+          </div>
+        </div>
+      </div>
+      <div id="controls-row">
+        <div class="timer-badge" id="total-badge">⏳ 30:00</div>
+        <div id="center-top">
+          <button id="switch-btn">SWITCH</button>
+        </div>
+        <div class="timer-badge" aria-hidden="true" style="visibility:hidden">00:00</div>
+      </div>
+      <div id="btn-row">
+        <button class="sys-btn" id="mute-btn">🔊 SOUND</button>
+        <button class="sys-btn" id="pause-btn"><span class="btn-ico">⏸</span><span class="btn-txt">PAUSE</span></button>
+        <button class="sys-btn" id="reset-btn">↩ RESET</button>
+      </div>
+
+
+    </div>
+  </div>
+</div>
+
+<script>
+// Dynamic app icons (monkey face from in-game pixel art)
+function makeMonkeyFacePng(size){
+  const cv=document.createElement('canvas');
+  cv.width=cv.height=size;
+  const ctx=cv.getContext('2d');
+  ctx.imageSmoothingEnabled=false;
+  // Match in-game monkey face (same palette + proportions)
+  const g0='#e8f8c8';
+  const fur='#7a4818', furH='#a06828', furD='#4a2808';
+  const face='#c88050', faceH='#e0a070';
+  const eye='#080808';
+  const N=16;
+  const s=Math.floor(size/N);
+  const off=Math.floor((size-s*N)/2);
+  const px2=(x,y,w,h,c)=>{ctx.fillStyle=c;ctx.fillRect(off+x*s,off+y*s,w*s,h*s);};
+  // background (non-white, non-transparent)
+  px2(0,0,16,16,'#081808');
+  // subtle frame
+  px2(0,0,16,1,'#386830');px2(0,15,16,1,'#204820');
+  px2(0,0,1,16,'#204820');px2(15,0,1,16,'#081808');
+
+  // Draw the same full monkey sprite as drawMonkey() (static chase frame)
+  const bx=1, by=0; // placement within 16×16
+  // Tail
+  [[10,6],[11,7],[11,8],[10,9],[9,10]].forEach(([tx,ty])=>px2(bx+tx,by+ty,1,1,fur));
+  px2(bx+10,by+6,1,1,furH);
+
+  // Body
+  px2(bx+2,by+8,9,4,fur);
+  px2(bx+2,by+8,9,1,furH);
+  px2(bx+3,by+9,7,2,'#b87048'); // belly
+
+  // Head
+  px2(bx+2,by+1,9,6,fur);
+  px2(bx+3,by+0,7,1,fur);
+  px2(bx+3,by+7,7,1,fur);
+  px2(bx+1,by+2,2,4,fur);
+  px2(bx+10,by+2,2,4,fur);
+  px2(bx+3,by+1,7,1,furH);
+
+  // Face plate
+  px2(bx+3,by+2,7,4,face);
+  px2(bx+4,by+1,5,1,face);
+  px2(bx+3,by+6,7,1,faceH);
+
+  // Ears
+  px2(bx+1,by+2,2,2,fur);px2(bx+1,by+3,1,1,face);
+  px2(bx+10,by+2,2,2,fur);px2(bx+11,by+3,1,1,face);
+
+  // Eyes
+  px2(bx+4,by+3,2,2,eye);px2(bx+4,by+3,1,1,g0);
+  px2(bx+8,by+3,2,2,eye);px2(bx+8,by+3,1,1,g0);
+
+  // Nose
+  px2(bx+6,by+5,2,1,furD);
+
+  // Mouth (chase smile)
+  px2(bx+4,by+6,1,1,furD);
+  px2(bx+5,by+7,3,1,furD);
+  px2(bx+8,by+6,1,1,furD);
+  px2(bx+5,by+7,3,1,g0);
+
+  // Arms (chase)
+  px2(bx+1,by+10,2,1,fur);
+  px2(bx+10,by+10,2,1,fur);
+
+  // Legs
+  px2(bx+3,by+12,3,2,fur);
+  px2(bx+7,by+12,3,2,fur);
+  px2(bx+3,by+13,4,1,face);
+  px2(bx+7,by+13,4,1,face);
+  return cv.toDataURL('image/png');
+}
+
+const icon192=makeMonkeyFacePng(192);
+const icon512=makeMonkeyFacePng(512);
+
+const mfObj={
+  name:'Banana Tower Shift',
+  short_name:'BTS',
+  description:'Procrastination monkey vs. architect – chess timer productivity game',
+  start_url:'./banana-tower-shift.html',
+  scope:'./',
+  display:'fullscreen',
+  orientation:'portrait',
+  background_color:'#0a0a0a',
+  theme_color:'#1a0a00',
+  icons:[
+    {src:icon192,sizes:'192x192',type:'image/png'},
+    {src:icon512,sizes:'512x512',type:'image/png'}
+  ]
+};
+const mb=new Blob([JSON.stringify(mfObj)],{type:'application/json'});
+const ml=document.createElement('link');ml.rel='manifest';ml.href=URL.createObjectURL(mb);document.head.appendChild(ml);
+
+const il=document.createElement('link');il.rel='apple-touch-icon';il.href=icon192;document.head.appendChild(il);
+const fav=document.createElement('link');fav.rel='icon';fav.href=icon192;document.head.appendChild(fav);
+const _sw="const CACHE = 'bts-v2';\n// Single-file app shell\nconst APP_SHELL = './banana-tower-shift.html';\n\nself.addEventListener('install', e => {\n  e.waitUntil((async()=>{\n    const c=await caches.open(CACHE);\n    await c.addAll([APP_SHELL]);\n    self.skipWaiting();\n  })());\n});\n\nself.addEventListener('activate', e => {\n  e.waitUntil((async()=>{\n    const keys=await caches.keys();\n    await Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)));\n    self.clients.claim();\n  })());\n});\n\nself.addEventListener('fetch', e => {\n  const req=e.request;\n  if(req.mode==='navigate'){\n    e.respondWith((async()=>{\n      const cached=await caches.match(APP_SHELL);\n      if(cached) return cached;\n      try{ return await fetch(req); }catch{ return cached; }\n    })());\n    return;\n  }\n  e.respondWith(caches.match(req).then(cached => cached || fetch(req)));\n});\n";
+if('serviceWorker' in navigator){
+  const _sb=new Blob([_sw],{type:'text/javascript'});
+  navigator.serviceWorker.register(URL.createObjectURL(_sb)).catch(()=>{});
+}
+</script><script>// ══════════════════════════════════════════════════════════════
+//  BANANA TOWER SHIFT  –  game.js v6
+//  Game Boy Color-inspired palette & retro aesthetics
+// ══════════════════════════════════════════════════════════════
+
+const topCv  = document.getElementById('top-cv');
+const botCv  = document.getElementById('bot-cv');
+
+const topCtx = topCv.getContext('2d');
+const botCtx = botCv.getContext('2d');
+
+// ビル窓状態を固定するキャッシュ
+const windowCache = {};
+
+// 残像・にじみ防止
+topCtx.imageSmoothingEnabled = false;
+botCtx.imageSmoothingEnabled = false;
+
+// ── GBC-inspired Palette ──────────────────────────────────────
+// 4-shade green tones like original GBC + selective colour
+const G4 = {
+  // GBC classic green shades (like Pocket/Color LCD)
+  g0: '#e8f8c8',  // lightest
+  g1: '#98c848',  // light green
+  g2: '#386830',  // dark green
+  g3: '#081808',  // darkest
+
+  // GBC-style warm accents
+  banana:  '#f8d800',
+  bananaS: '#c8a800',
+  bananaH: '#fff8a0',
+  peel:    '#d89000',
+  peelS:   '#906000',
+  peelH:   '#f0b840',
+  peelIn:  '#e8a820',
+
+  // Brown monkey (warm earthy)
+  mFur:   '#7a4818', mFurH:'#a06828', mFurD:'#4a2808',
+  mFace:  '#c88050', mFaceH:'#e0a070',
+  mBelly: '#b87048',
+  mEye:   '#080808',
+
+  // Worker
+  skin:   '#e8a060', skinD:'#b07030',
+  hat:    '#f8d000', hatB: '#c8a000',
+  shirt:  '#2870c0', shirtD:'#184890',
+  pants:  '#1850a0', pantsD:'#0c3070',
+  boot:   '#181008',
+
+  // Bricks
+  // Building colors: light grey concrete with warm street-light tint
+  brkA:'#8a8878',   // main face: warm light grey
+  brkB:'#a8a898',   // top highlight: lighter
+  brkC:'#6a6860',   // side shadow: darker
+  brkMort:'#505048', // mortar: dark warm grey
+  brkShd:'#3a3830',  // deep shadow under each row
+  brkLit:'#b8a888',  // street-lamp warm reflection (right side)
+  brkBad:'#786840', brkBadB:'#a09050',  // corrupted: banana-tinted
+
+  // Castle
+  csA:'#387040', csH:'#508850', csDk:'#205030',
+
+  // Ground
+  gnd:  '#204820', gndH: '#308040',
+
+  // Trash (grey metal)
+  trashLid:'#909090', trashBin:'#686868', trashHi:'#b8b8b8', trashDk:'#383838',
+};
+
+// ── Jungle background palette (top screen) ────────────────────
+// Deep GBC greens with blue-greens for foliage
+const JNG = {
+  sky:  '#081828',  // dark blue-green night sky
+  skyM: '#102838',
+  fog:  '#183830',
+  leaf1:'#205028', leaf2:'#287030', leaf3:'#389050',
+  trunk:'#382010', trunkH:'#503018',
+  vine: '#1e4818',
+  moon: '#a8c870',
+  star: '#70a858',
+  gnd:  '#102010', gndH:'#1a3018',
+};
+
+// ── City background palette (bottom screen) ───────────────────
+const CTY = {
+  sky:   '#081020',
+  skyM:  '#101828',
+  bld1:  '#182028', bld1H:'#283040',
+  bld2:  '#101820', bld2H:'#202830',
+  bld3:  '#1c2830', bld3H:'#2c3840',
+  win:   '#f8e840', winOff:'#102030',
+  road:  '#101010', roadH:'#202020',
+  light: '#f8c820',
+  cloud: '#1a2a38',
+};
+
+// ── Sizing ────────────────────────────────────────────────────
+let SW = 0, SH = 0;
+let UI_TIMER_FS = 16;
+function updateUiTimerFont(){
+  const el=document.getElementById('total-badge');
+  if(!el)return;
+  const v=parseInt(getComputedStyle(el).fontSize,10);
+  if(Number.isFinite(v)&&v>0) UI_TIMER_FS=v;
+}
+function layout() {
+  const vw=window.innerWidth, vh=window.innerHeight;
+  const resH=13+78+36+62;
+  const availH=vh-resH, availW=vw-40;
+  const asp=4/3;
+  let sh=Math.floor(availH/2), sw=Math.floor(sh*asp);
+  if(sw>availW){sw=availW;sh=Math.floor(sw/asp);}
+  SW=sw;SH=sh;
+  [topCv,botCv].forEach(cv=>{cv.width=SW;cv.height=SH;});
+  ['top-canvas-wrap','bottom-canvas-wrap'].forEach(id=>{
+    const el=document.getElementById(id);
+    el.style.width=SW+'px';el.style.height=SH+'px';
+  });
+  if(G) initPositions();
+  updateUiTimerFont();
+}
+
+// geometry helpers
+function brickW()  {return Math.max(44,Math.floor(SW*0.38));}
+function brickX()  {return Math.floor(SW*0.53);}
+function brickUW() {return Math.floor(brickW()/6);}
+function groundY() {return SH-14;}
+function rowH()    {return Math.max(5,Math.floor((groundY()-8)/11));}
+// Sprite sizes – HALF of what they were
+function workerS() {return Math.max(1,Math.floor(SH/48));}
+function monkeyS() {return Math.max(1,Math.floor(SH/48));}
+function peelS()   {return Math.max(1,Math.floor(workerS()*18/36));}
+function castleS() {return Math.max(1,Math.floor(SH/50));}
+
+// ── State ─────────────────────────────────────────────────────
+let G, selectedMin=30, muted=false, paused=false;
+
+const CHEERS = [
+  "You can do it!", "Keep going!", "Amazing work!", "So close now!",
+  "Stay focused!", "One brick at a time!", "You're on fire!",
+  "Building greatness!", "Don't stop now!", "Level up!",
+  "Hard work pays off!", "Nice progress!", "Keep it up!",
+  "Looking good!", "Almost there!", "Strong effort!",
+  "You're crushing it!", "Great pace!", "Believe in yourself!",
+  "No monkey business!", "Focus wins!", "Row by row!",
+  "The tower grows!", "Steady hands!", "Brick by brick!",
+  "Your best work yet!", "Making history!", "Stay the course!",
+  "Rise and build!", "Champion mindset!",
+  "Every second counts!", "Eyes on the prize!",
+  "You've got this!", "Unstoppable!",
+  "That's the spirit!", "Keep the momentum!",
+  "One more row!", "Nearly there!",
+  "Proud of you!", "Pure focus!",
+  "This is your moment!", "No looking back!",
+  "Dream big, build big!", "Make it happen!"
+];
+
+// Worker speech: work mode (creativity/art)
+const WORKER_WORK = [
+  "Art begins with\none brave brick.",
+  "Every wall is\na canvas.",
+  "Creation is\ncourage in form.",
+  "Beauty hides\nin structure.",
+  "A craftsman\nputs soul in stone.",
+  "Build like no\none is watching.",
+  "Design is frozen\nmusic.",
+  "Each brick: a\nnote in the song.",
+  "The city dreams\nin geometry.",
+  "Make it strong.\nMake it beautiful.",
+];
+
+// Worker speech: rest/sleep mode (cosmic poetry)
+const WORKER_SLEEP = [
+  "...stars are just\nold light...",
+  "...the moon owes\nme a sandwich...",
+  "...gravity is\na gentle hug...",
+  "...black holes hum\nin C minor...",
+  "...I am stardust\non a deadline...",
+  "...nebulae bloom\nin silence...",
+  "...time folds like\na paper crane...",
+  "...the void said\nhello back...",
+  "...comets write\npoems in dust...",
+  "...the universe\nblinks slowly...",
+];
+
+// Monkey banana facts (shown during MONKEY mode)
+const MONKEY_FACTS = [
+  "Bananas are\nberries. True!",
+  "Bananas ripen\nfaster in bunches.",
+  "A cluster of\nbananas is a hand.",
+  "Bananas float\non water!",
+  "Banana peels\ncan fuel cars.",
+  "Bio-ethanol from\nbanana waste!",
+  "Banana skins\ncompost in 2 weeks.",
+  "Bananas cut\nCO2 when grown right.",
+  "Banana plants\nare giant herbs.",
+  "Humans share\n60% DNA with bananas.",
+  "Banana peels\nshine your shoes!",
+  "Millions of tons\nof peels are wasted.",
+  "Peel biomass can\ngenerate electricity.",
+  "Bananas absorb\nheavy metals from soil.",
+  "Banana farming\nuses lots of water.",
+  "Fair-trade bananas\nhelp the planet.",
+  "Organic bananas\nhave no pesticides.",
+  "Banana leaves\nreplace plastic wrap.",
+  "One banana tree\nfeeds a family.",
+  "Bananas release\nethylene gas to ripen.",
+];
+
+function newGame(min) {
+  return {
+    mode:'setup',
+    workSec:0, monkeySec:0, targetSec:min*60,
+    brickTimer:0, bricks:0, rows:0, castles:0, brickPartW:0,
+    hammerFlash:0,
+    peels:[], peelTimer:0, peelInterval:22,
+    trashCount:0,
+    corruption:0, castleList:[],
+    // Worker
+    workerX:0, workerTargetX:0, workerMode:'work',
+    // Monkey – chases worker in top screen (mirrored x from bot)
+    monkeyX:0, monkeyTargetX:0,
+    monkeyJump:0, monkeyJumpV:0, monkeyBounceT:0,
+    // Eat anim
+    bananaEat:0,  // 0→1, loops
+    eatMunchT:0,  // mouth open timer
+    eatCycleT:0,  // chew→throw cycle timer
+    // Cheer message (same timer system as worker)
+    cheerMsg:'', cheerMsgTimer:0, cheerMsgVisible:false,
+    cheerSpeechT:0,
+    // Monkey fact bubble (MONKEY mode)
+    monkeyMsg:'', monkeyMsgTimer:0, monkeyMsgVisible:false,
+    monkeySpeechT:0,
+    // Worker speech bubble
+    workerMsg:'', workerMsgTimer:0, workerMsgVisible:false,
+    workerSpeechT:0,  // countdown until next speech
+    // Zzz
+    zz:[], zzTimer:0,
+    // Idle monkey (setup screen)
+    idleX:0, idleDir:1, idleMode:'walk', idleTimer:0,
+    idleTargetX:0,
+    // Hearts (like animation)
+    hearts:[],
+    likeAnim:0,   // >0 = dancing after like
+    // FX
+    fc:0, brickFlash:0, rowFlash:0, castleFlash:0,
+    // BG scroll
+    bgScroll:0,
+    // Pause dance
+    pauseDance:0,
+  };
+}
+
+function initPositions(){
+  G.workerX=G.workerTargetX=brickX()+brickW()*0.5;
+  G.monkeyX=G.monkeyTargetX=SW*0.15;
+  G.idleX=Math.floor(SW*0.5);
+  G.idleTargetX=Math.floor(SW*0.5);
+}
+
+// ── Audio ─────────────────────────────────────────────────────
+const AC=new(window.AudioContext||window.webkitAudioContext)();
+function tone(f,tp,d,v,t0=0){
+  if(muted)return;
+  try{
+    AC.resume();
+    const o=AC.createOscillator(),g=AC.createGain();
+    o.connect(g);g.connect(AC.destination);
+    o.type=tp;o.frequency.value=f;
+    const t=AC.currentTime+t0;
+    g.gain.setValueAtTime(v,t);
+    g.gain.exponentialRampToValueAtTime(0.001,t+d);
+    o.start(t);o.stop(t+d+0.02);
+  }catch(e){}
+}
+function snd(name){
+  if(muted)return;AC.resume();
+  const T=(f,tp,d,v,t)=>tone(f,tp,d,v,t);
+  switch(name){
+    case 'click':  T(900,'square',.035,.16);T(1100,'square',.035,.12,.03);break;
+    case 'start':  T(440,'square',.07,.20);T(550,'square',.07,.20,.08);T(660,'square',.12,.20,.16);break;
+    case 'switch': T(880,'square',.07,.20);T(330,'square',.08,.15,.06);break;
+    case 'brick':  T(260,'square',.04,.18);T(180,'sawtooth',.06,.12,.03);break;
+    case 'peel':   T(140,'sawtooth',.14,.20);T(90,'sawtooth',.10,.14,.10);break;
+    case 'sweep':  T(520,'sine',.10,.14);T(660,'sine',.08,.11,.08);break;
+    case 'row':    T(523,'square',.10,.20);T(659,'square',.10,.20,.10);T(784,'square',.14,.20,.20);break;
+    case 'castle': [523,659,784,880,1047].forEach((f,i)=>T(f,'square',.18,.22,i*.09));
+                   setTimeout(()=>[784,880,1047].forEach((f,i)=>T(f,'square',.22,.18,i*.07)),560);break;
+    case 'win':    [523,659,784,1047,1319].forEach((f,i)=>T(f,'square',.25,.20,i*.11));break;
+  }
+}
+
+// ── UI wiring ─────────────────────────────────────────────────
+document.getElementById('mute-btn').onclick=()=>{muted=!muted;document.getElementById('mute-btn').textContent=muted?'🔇 MUTE':'🔊 SOUND';};
+document.getElementById('reset-btn').onclick=()=>resetGame();
+document.getElementById('switch-btn').onclick=()=>switchMode();
+document.getElementById('go-btn').onclick=()=>startGame();
+document.getElementById('pause-btn').onclick=()=>togglePause();
+document.querySelectorAll('.time-opt').forEach(b=>{
+  if(!b.dataset.min)return;
+  b.onclick=()=>{
+    AC.resume();snd('click');
+    document.querySelectorAll('.time-opt').forEach(x=>x.classList.remove('sel'));
+    b.classList.add('sel');
+    selectedMin=+b.dataset.min;
+    if(G) G.targetSec=selectedMin*60;
+    const el=document.getElementById('total-badge');
+    if(el) el.textContent=`⏳ ${fmtRemain(selectedMin*60)}`;
+  };
+});
+document.addEventListener('keydown',e=>{
+  if(e.code==='Space'){e.preventDefault();if(G?.mode==='work'||G?.mode==='monkey')switchMode();}
+  if(e.code==='Enter'&&G?.mode==='setup')startGame();
+  if(e.code==='KeyR')resetGame();
+  if(e.code==='KeyP')togglePause();
+});
+[topCv,botCv].forEach(cv=>{
+  cv.addEventListener('touchstart',e=>{
+    e.preventDefault();
+    if(G?.mode==='setup'){ tapMonkey(e.touches[0].clientX,e.touches[0].clientY); return; }
+    if(G?.mode==='work'||G?.mode==='monkey')switchMode();
+  },{passive:false});
+});
+topCv.addEventListener('click',e=>{
+  if(G?.mode==='setup'){ tapMonkey(e.clientX,e.clientY); }
+});
+
+function tapMonkey(cx,cy){
+  const rect=topCv.getBoundingClientRect();
+  const scaleX=SW/rect.width, scaleY=SH/rect.height;
+  const lx=(cx-rect.left)*scaleX;
+  const ly=(cy-rect.top)*scaleY;
+  const ms=monkeyS();
+  const mx=G.idleX, my=SH-12-14*ms;
+  if(lx>mx-2&&lx<mx+14*ms&&ly>my-2&&ly<my+14*ms){
+    // Monkey was tapped! – spawn hearts
+    G.likeAnim=1.8;
+    for(let i=0;i<4;i++){
+      G.hearts.push({x:mx+ms*7+( Math.random()-0.5)*ms*8,y:my+ms*3,a:1});
+    }
+    snd('row');
+  }
+}
+
+function switchMode(){
+  if(!G||G.mode==='setup'||G.mode==='ended'||paused)return;
+  AC.resume();G.mode=G.mode==='work'?'monkey':'work';
+  if(G.mode==='work'){G.zz=[];G.zzTimer=0;G.hammerFlash=0;}
+  snd('switch');if(navigator.vibrate)navigator.vibrate([25,8,8]);
+}
+function startGame(){
+  if(!G||G.mode!=='setup')return;
+  AC.resume();snd('start');
+  document.getElementById('setup-ov').classList.add('hidden');
+  initPositions();G.mode='work';
+}
+function resetGame(){
+  paused=false;
+  document.getElementById('pause-btn').textContent='⏸ PAUSE';
+  document.getElementById('pause-btn').classList.remove('paused');
+  AC.resume();
+  document.getElementById('end-ov').classList.add('hidden');
+  document.getElementById('setup-ov').classList.remove('hidden');
+  document.getElementById('likes-overlay').classList.add('visible');
+  G=newGame(selectedMin);layout();
+}
+function togglePause(){
+  if(!G||G.mode==='setup'||G.mode==='ended')return;
+  paused=!paused;
+  const btn=document.getElementById('pause-btn');
+  btn.textContent=paused?'▶ RESUME':'⏸ PAUSE';
+  btn.classList.toggle('paused',paused);
+}
+
+// ── Draw helper ───────────────────────────────────────────────
+function px(ctx,x,y,w,h,c){
+  ctx.fillStyle=c;ctx.fillRect(Math.round(x),Math.round(y),Math.max(1,w),Math.max(1,h));
+}
+
+// ══════════════════════════════════════════════════════════════
+//  BACKGROUNDS
+// ══════════════════════════════════════════════════════════════
+
+// Jungle background (top screen)
+// ── Global pixel-art helpers for jungle ──
+function pixDome(cx,baseY,rw,rh,col,hiCol,shadowCol){
+  if(rw<3||rh<3) return;
+  const ctx2=topCtx;
+  const D=3;
+  for(let row=0;row<rh;row+=D){
+    const phase=Math.sin(Math.min(1,row/rh/0.55)*Math.PI);
+    const w=Math.max(D*2,Math.floor(rw*phase));
+    const lx=cx-Math.floor(w/2), y=baseY-rh+row;
+    const isHi=row<rh*0.25, isShadow=row>rh*0.72&&!isHi;
+    ctx2.fillStyle=isShadow?shadowCol:(isHi?hiCol:col);
+    ctx2.fillRect(lx,y,w,D);
+    if(w>6){ctx2.fillStyle=hiCol;ctx2.fillRect(lx,y,3,D);}
+  }
+}
+function pixDomeCtx(ctx,cx,baseY,rw,rh,col,hiCol,shadowCol){
+  if(rw<2||rh<2) return;
+  for(let row=0;row<rh;row++){
+    const phase=Math.sin(Math.min(1,row/rh/0.55)*Math.PI);
+    const w=Math.max(2,Math.floor(rw*phase));
+    const lx=cx-Math.floor(w/2), y=baseY-rh+row;
+    const isHi=row<rh*0.25, isShadow=row>rh*0.72&&!isHi;
+    ctx.fillStyle=isShadow?shadowCol:(isHi?hiCol:col);
+    ctx.fillRect(lx,y,w,1);
+    if(w>4){ctx.fillStyle=hiCol;ctx.fillRect(lx,y,2,1);}
+  }
+}
+
+// ── Jungle BG cache (OffscreenCanvas, rebuilt only when size changes) ──
+let _jCache=null, _jCacheW=0, _jCacheH=0;
+
+function buildJungleCache(W,H){
+  // Cache ONLY: sky gradient + moon + static stars
+  const safeW=Math.max(1,W), safeH=Math.max(1,H);
+  const oc=(typeof OffscreenCanvas!=='undefined')
+    ?new OffscreenCanvas(safeW,safeH)
+    :(()=>{const c=document.createElement('canvas');c.width=safeW;c.height=safeH;return c;})();
+  const c=oc.getContext('2d');
+  const D=3;  // dot size
+  const p=(x,y,w,h,col)=>{c.fillStyle=col;c.fillRect(Math.round(x),Math.round(y),Math.max(D,w),Math.max(D,h));};
+
+  // Sky bands
+  [[0,Math.floor(H*0.18),'#071018'],[Math.floor(H*0.18),Math.floor(H*0.34),'#0b1822'],
+   [Math.floor(H*0.34),Math.floor(H*0.50),'#0e2020'],[Math.floor(H*0.50),H,'#122818'],
+  ].forEach(([y1,y2,col])=>{c.fillStyle=col;c.fillRect(0,y1,W,y2-y1);});
+
+  // Moon (pixel circle)
+  const mX=Math.floor(W*0.80),mY=Math.floor(H*0.11),mr=Math.max(6,Math.floor(H/18));
+  for(let dy=-mr;dy<=mr;dy++) for(let dx=-mr;dx<=mr;dx++)
+    if(dx*dx+dy*dy<=mr*mr){
+      const hi=(dx<0&&dy<0)||dx<-mr*0.3;
+      c.fillStyle=hi?'#e0f8a0':'#b8d878'; c.fillRect(mX+dx,mY+dy,1,1);
+    }
+  const sOff=Math.floor(mr*0.38);
+  for(let dy=-mr;dy<=mr;dy++) for(let dx=-mr;dx<=mr;dx++)
+    if((dx-sOff)*(dx-sOff)+dy*dy<=(mr*0.84)*(mr*0.84)){c.fillStyle='#0b1822';c.fillRect(mX+dx,mY+dy,1,1);}
+
+  // Static star base (twinkle added live)
+  [[.06,.06],[.16,.10],[.25,.04],[.38,.09],[.50,.05],[.62,.11],[.73,.03],[.90,.08]].forEach(([fx,fy])=>
+    p(Math.floor(fx*W),Math.floor(fy*H*0.72),D,D,'#2a5a30')
+  );
+
+  // Ground
+  p(0,H-12,W,12,'#1e5028'); p(0,H-12,W,2,'#2a7038');
+  return oc;
+}
+
+function drawJungle(ctx,W,H,scroll){
+  if(W<1||H<1) return;
+  if(!_jCache||_jCacheW!==W||_jCacheH!==H){
+    _jCache=buildJungleCache(W,H);
+    _jCacheW=W; _jCacheH=H;
+  }
+  ctx.drawImage(_jCache,0,0);
+
+  const sc=Math.floor(scroll);
+  const D=3;  // dot size for all live drawing
+  const p=(x,y,w,h,col)=>px(ctx,x,y,Math.max(D,w),Math.max(D,h),col);
+
+  // Twinkling stars (live, scroll slowly)
+  [[.06,.06],[.16,.10],[.25,.04],[.38,.09],[.50,.05],[.62,.11],[.73,.03],[.90,.08]].forEach(([fx,fy],i)=>{
+    const sx=((Math.floor(fx*W)+Math.floor(sc*0.12)+i*23)%W);
+    const sy=Math.floor(fy*H*0.72);
+    const bright=(G.fc+i*11)%34<17;
+    p(sx,sy,D,D,bright?'#88c868':'#3a6a38');
+    if(bright) p(sx+D,sy,D,D,'#b8e898');
+  });
+
+  // ── FAR silhouette (scrolls slowly, 3 layers) ──
+  const farBot=H-14;
+  [
+    {speed:0.05,col:'#08120a',hi:'#0d1a0e',baseH:0.30,ampH:0.14,f:[2.7,5.9,12.1,27.3,53.7],ph:[1.3,0.8,2.1,0.6,1.7]},
+    {speed:0.09,col:'#0c1a0d',hi:'#112010',baseH:0.25,ampH:0.12,f:[2.3,5.3,11.7,24.1,49.3],ph:[0.9,1.4,0.7,1.8,0.4]},
+    {speed:0.13,col:'#101e11',hi:'#162614',baseH:0.21,ampH:0.10,f:[3.1,6.7,13.3,29.1,57.1],ph:[1.7,0.5,2.3,0.8,1.2]},
+  ].forEach((L,li)=>{
+    const offX=Math.floor(sc*L.speed);
+    const wts=[0.35,0.25,0.20,0.12,0.08];
+    for(let x=0;x<W;x+=D){
+      const xn=(x+offX)/W;
+      let v=0; L.f.forEach((f,fi)=>v+=Math.sin(xn*Math.PI*f+L.ph[fi])*wts[fi]);
+      const norm=Math.max(0,Math.min(1,0.5+v*0.45));
+      const colH=Math.floor(H*(L.baseH+norm*L.ampH));
+      const topY=farBot-colH;
+      p(x,topY,D,D,L.hi);
+      p(x,topY+D,D,Math.max(D,colH-D),L.col);
+    }
+  });
+
+  // ── MID-GROUND trees (scroll at medium speed) ──
+  const mgGnd=H-14;
+  [
+    {ox:0,  trH:0.46,trW:16,seed:3, leanX:4 },
+    {ox:100,trH:0.42,trW:13,seed:11,leanX:-6},
+    {ox:195,trH:0.50,trW:18,seed:7, leanX:8 },
+    {ox:290,trH:0.44,trW:14,seed:17,leanX:-4},
+    {ox:380,trH:0.40,trW:12,seed:5, leanX:5 },
+  ].forEach((t,ti)=>{
+    const tx=((t.ox+Math.floor(sc*0.28)+ti*11)%(W+90))-18;
+    const trH=Math.floor(H*t.trH), cx=tx+Math.floor(t.trW/2), s=t.seed, top=mgGnd-trH;
+    // Trunk
+    for(let ty=0;ty<trH;ty+=D){
+      const frac=ty/trH;
+      const tw2=Math.max(D*2,Math.round(t.trW*(1-frac*0.30)+(frac<0.15?(0.15-frac)*t.trW*0.8:0)));
+      const lx=cx+Math.round(t.leanX*frac)-Math.floor(tw2/2);
+      p(lx,top+ty,tw2,D,(ty%8<4)?'#2a3c14':'#1e2c0e');
+      p(lx,top+ty,Math.max(D,3),D,'#3a5020');
+    }
+    // Root buttresses
+    const rb=t.trW+Math.floor(t.trW*0.8);
+    for(let ry=0;ry<10;ry+=D){const rw2=Math.max(D,rb-ry*Math.floor(rb/12));p(cx-Math.floor(rw2/2),mgGnd-10+ry,rw2,D,'#1c2c0e');}
+    // Canopy blobs
+    const cCX=cx+t.leanX, cY=top+Math.floor(trH*0.05);
+    const BIG=Math.floor(trH*0.45),MED=Math.floor(trH*0.33),SML=Math.floor(trH*0.22);
+    const pal=[['#38903e','#4ab04e','#1e4c22'],['#2e7c34','#3a963e','#16401c'],
+               ['#247030','#2e883a','#103618'],['#1c5c28','#246830','#0c2c14']];
+    [[(s%5-2)*8,-Math.floor(BIG*0.15),BIG,Math.floor(BIG*0.72),0],
+     [-Math.floor(BIG*0.65)+(s%7-3)*5,Math.floor(BIG*0.10),Math.floor(BIG*0.90),Math.floor(BIG*0.65),1],
+     [Math.floor(BIG*0.55)+(s%5-2)*6,Math.floor(BIG*0.14),Math.floor(MED*1.1),Math.floor(MED*0.80),1],
+     [-Math.floor(BIG*1.05)+(s%3)*8,Math.floor(BIG*0.30),Math.floor(MED*0.90),Math.floor(MED*0.65),2],
+     [Math.floor(BIG*0.90)+(s%4-1)*7,Math.floor(BIG*0.25),Math.floor(MED*0.80),Math.floor(MED*0.60),2],
+     [-Math.floor(BIG*0.35)+(s%6-3)*5,Math.floor(BIG*0.45),Math.floor(MED*0.75),Math.floor(MED*0.55),2],
+     [Math.floor(BIG*0.30)+(s%4-2)*6,Math.floor(BIG*0.42),Math.floor(MED*0.70),Math.floor(MED*0.50),2],
+     [-Math.floor(BIG*0.50)+(s%5-2)*4,Math.floor(BIG*0.60),Math.floor(SML*1.2),Math.floor(SML*0.90),3],
+     [Math.floor(BIG*0.42)+(s%3-1)*5,Math.floor(BIG*0.58),Math.floor(SML*1.1),Math.floor(SML*0.85),3],
+     [(s%11-5)*Math.floor(BIG*0.18),Math.floor(BIG*0.20),SML,Math.floor(SML*0.70),1],
+    ].forEach(([dx,dy,rw,rh,pi])=>{
+      if(rw<D*2||rh<D) return;
+      const[col,hi,sh]=pal[pi];
+      pixDome(cCX+dx,cY+dy,rw,rh,col,hi,sh);
+    });
+    // Leaf highlights
+    [[(s%9-4)*12,-Math.floor(BIG*0.12)],[-Math.floor(BIG*0.58),Math.floor(BIG*0.04)],
+     [Math.floor(BIG*0.48),Math.floor(BIG*0.06)],[(s%7-3)*8,Math.floor(BIG*0.22)],
+     [-Math.floor(BIG*0.90),Math.floor(BIG*0.26)]
+    ].forEach(([dx,dy])=>{p(cCX+dx,cY+dy,D*2,D,'#58d460');p(cCX+dx,cY+dy+D,D,D,'#40a848');});
+    // Epiphytes
+    for(let ei=0;ei<3;ei++){
+      const ey=top+Math.floor(trH*(0.3+ei*0.2)),ex=cx+(ei%2===0?Math.floor(t.trW*0.6):-Math.floor(t.trW*0.3));
+      pixDome(ex,ey,8,5,'#1e6028','#289038','#0e3014');
+    }
+    // Fruit
+    if(s%3!==2){
+      const fSide=(s%2===0)?-Math.floor(BIG*0.45):Math.floor(BIG*0.38),fY=cY+Math.floor(BIG*0.35);
+      const fCol=s%4===0?'#e83818':(s%4===1?'#f09020':'#c020b0');
+      for(let fi=0;fi<4;fi++){p(cCX+fSide+(fi%2)*6,fY+Math.floor(fi/2)*6,D+2,D+2,fCol);}
+    }
+  });
+
+  // Ground strip (over cache ground, live so vines can draw on top)
+  px(ctx,0,H-12,W,12,'#1e5028'); px(ctx,0,H-12,W,2,'#2a7038');
+
+  const dummy=sc; // keep sc in scope for vines below
+
+  // ── Vines hanging from top ──
+  for(let i=0;i<12;i++){
+    const vx=((i*35+Math.floor(sc*0.55)+i*17)%W);
+    const vlen=Math.floor(H*0.10)+((i*29)%Math.floor(H*0.14));
+    const sway1=((i%5)-2)*4, sway2=((i%3)-1)*5;
+    // segmented vine with gentle S-curve using pixel steps
+    let prevX=vx;
+    for(let seg=0;seg<vlen;seg+=3){
+      const t2=seg/vlen;
+      const curX=vx+Math.floor(sway1*Math.sin(t2*Math.PI)+sway2*Math.sin(t2*Math.PI*2));
+      px(ctx,curX,seg,1+(i%2),3,'#1c4a18');
+      if(curX!==prevX) px(ctx,Math.min(curX,prevX),seg,Math.abs(curX-prevX)+1,1,'#1c4a18');
+      // leaf clusters at intervals
+      if(seg>0&&seg%(Math.floor(vlen/3))<3){
+        const lsize=3+((i+seg)%3);
+        pixDome(curX+((i%2)?lsize:-lsize),seg,lsize*2+2,lsize,'#286828','#3a8838','#164018');
+      }
+      prevX=curX;
+    }
+  }
+
+  // ── Foreground: jungle undergrowth (ferns, palm fronds, broad leaves) ──
+  {
+    const baseY=H-14;
+    // Helper: draw a single palm/fern frond as a pixel arc of dots
+    // from base (bx,by) at angle, length len, colour col
+    function pixFrond(bx,by,angle,len,leafW,col,hiCol){
+      const cos=Math.cos(angle), sin=Math.sin(angle);
+      for(let d=2;d<len;d+=2){
+        const fx=Math.round(bx+cos*d), fy=Math.round(by+sin*d);
+        const t2=d/len;
+        const w=Math.max(1,Math.round(leafW*(1-t2*t2)));
+        const c=t2<0.25?hiCol:col;
+        px(ctx,fx-Math.floor(w/2),fy-Math.floor(w/2),w,w,c);
+      }
+    }
+
+    // Draw fern/palm clusters at intervals
+    const clusterDefs=[
+      {type:'palm',  size:1.0},{type:'fern',  size:0.8},
+      {type:'broad', size:1.1},{type:'palm',  size:0.9},
+      {type:'fern',  size:1.0},{type:'broad', size:0.85},
+      {type:'palm',  size:1.1},{type:'fern',  size:0.9},
+      {type:'broad', size:1.0},{type:'palm',  size:0.85},
+      {type:'fern',  size:1.2},{type:'broad', size:0.9},
+    ];
+    for(let i=0;i<12;i++){
+      const bx=((i*34+Math.floor(sc*0.9)+i*11)%(W+16))-4;
+      const def=clusterDefs[i%clusterDefs.length];
+      const sz=def.size;
+
+      if(def.type==='palm'){
+        // Tall thin stalk with fronds fanning out at top
+        const stalkH=Math.floor(H*0.10*sz)+((i*7)%Math.floor(H*0.04));
+        const topY=baseY-stalkH;
+        // stalk
+        for(let ty=0;ty<stalkH;ty++){
+          const col=(ty%5<2)?'#2a4818':'#1e3810';
+          px(ctx,bx,baseY-ty,2,1,col);
+        }
+        // fan of 5 fronds
+        const frondLen=Math.floor(stalkH*0.75);
+        const angles=[-1.8,-1.4,-1.1,-0.75,-0.4];
+        angles.forEach((ang,fi)=>{
+          const fc2=fi===2?'#44a040':'#2a7030';
+          const fhi=fi===2?'#58c050':'#38883a';
+          pixFrond(bx,topY,ang,frondLen,3+(fi===2?2:1),fc2,fhi);
+        });
+        // right side fronds
+        [-1.6,-1.2,-0.8].forEach((ang)=>{
+          pixFrond(bx+1,topY,-ang,Math.floor(frondLen*0.85),2,'#286828','#34783a');
+        });
+
+      } else if(def.type==='fern'){
+        // Low spreading fern: central stem + alternating leaflets
+        const stemH=Math.floor(H*0.07*sz)+((i*5)%Math.floor(H*0.03));
+        const topY=baseY-stemH;
+        // central stem
+        px(ctx,bx,topY,2,stemH,'#1e3a10');
+        // alternating leaflets left/right
+        const leafCount=Math.floor(stemH/4);
+        for(let li2=0;li2<leafCount;li2++){
+          const ly=topY+li2*4+2;
+          const side=li2%2===0?-1:1;
+          const llen=Math.floor(stemH*0.5*(1-li2/leafCount))+4;
+          pixFrond(bx+(side>0?2:0),ly,side*(Math.PI*0.4-li2*0.03),llen,2,'#2a6828','#3a8838');
+        }
+
+      } else {
+        // Broad tropical leaf: large oval leaf with midrib
+        const leafH=Math.floor(H*0.09*sz)+((i*9)%Math.floor(H*0.03));
+        const leafW2=Math.floor(leafH*0.55);
+        const topY=baseY-leafH;
+        // leaf body (oval approximation with pixDome trick)
+        pixDome(bx,baseY,leafW2*2,leafH,'#246828','#30843a','#143618');
+        // midrib (lighter stripe down centre)
+        px(ctx,bx,topY,2,leafH,'#3a9040');
+        // Tip
+        px(ctx,bx-1,topY-2,4,3,'#40a848');
+        // Shadow under leaf
+        px(ctx,bx-leafW2+4,baseY-3,leafW2*2-8,3,'#0e2010');
+      }
+    }
+
+    // Dense grass tufts in gaps
+    for(let i=0;i<22;i++){
+      const gx=((i*18+Math.floor(sc*1.1)+i*5)%W);
+      const gh=4+((i*3)%5);
+      // 3-blade tuft
+      px(ctx,gx,  baseY-gh,  1,gh,  '#2a7030');
+      px(ctx,gx+2,baseY-gh-2,1,gh+2,'#30883a');
+      px(ctx,gx+4,baseY-gh+1,1,gh-1,'#246028');
+      // shadow at base
+      px(ctx,gx,  baseY-2,   5,2,   '#142e10');
+    }
+  }
+
+  // ── Ground strip ──
+  px(ctx,0,H-12,W,12,JNG.gnd);px(ctx,0,H-12,W,2,JNG.gndH);
+  // Grass tufts
+  for(let i=0;i<16;i++){
+    const gx=((i*22+Math.floor(sc*1.0)+i*7)%W);
+    px(ctx,gx,H-13,2,3,'#2a7030');px(ctx,gx+3,H-14,1,4,'#1e5828');
+  }
+}
+
+
+// City background (bottom screen)
+function drawCity(ctx,W,H,scroll){
+  // Sky
+  for(let y=0;y<H*0.7;y++){
+    const t=y/(H*0.7);
+    const r=Math.floor(8+t*12),g2=Math.floor(10+t*18),b=Math.floor(20+t*28);
+    ctx.fillStyle=`rgb(${r},${g2},${b})`;ctx.fillRect(0,y,W,1);
+  }
+
+  // Stars in city sky
+  [[.08,.04],[.22,.07],[.40,.02],[.60,.06],[.80,.03]].forEach(([fx,fy])=>px(ctx,Math.floor(fx*W),Math.floor(fy*H*0.5),2,1,CTY.cloud));
+
+// Background buildings (far – slow scroll)
+const farW=[30,22,28,35,20,40,25,32,18,38];
+const farH=[0.38,0.28,0.35,0.45,0.25,0.50,0.32,0.40,0.22,0.48];
+
+for(let i=0;i<10;i++){
+  const bx=((i*50+scroll*0.1)%(W+50))-10;
+  const bh=Math.floor(H*farH[i]);
+  const bw=farW[i];
+
+  px(ctx,bx,H-14-bh,bw,bh,CTY.bld1);
+  px(ctx,bx,H-14-bh,3,bh,CTY.bld1H);
+
+  // windows
+  for(let wy2=4;wy2<bh-4;wy2+=7){
+    for(let wx2=4;wx2<bw-4;wx2+=7){
+
+      const key=i+'_'+wx2+'_'+wy2;
+
+      if(windowCache[key]===undefined){
+        windowCache[key]=Math.random()>0.55;
+      }
+
+      const on=windowCache[key];
+
+const farWin = on ? '#c8b36a' : CTY.winOff;
+
+px(
+  ctx,
+  bx+wx2,
+  H-14-bh+wy2,
+  2,
+  2,
+  farWin
+);
+    }
+  }
+}
+
+  // Mid buildings
+  const midW=[22,18,26,30,16,24,20,28];
+  const midH=[0.42,0.32,0.48,0.55,0.28,0.44,0.36,0.50];
+  for(let i=0;i<8;i++){
+    const bx=((i*62+scroll*0.25+15)%(W+60))-10;
+    const bh=Math.floor(H*midH[i]);
+    const bw=midW[i];
+    px(ctx,bx,H-14-bh,bw,bh,CTY.bld2);
+    px(ctx,bx,H-14-bh,2,bh,CTY.bld2H);
+    for(let wy2=3;wy2<bh-3;wy2+=8){
+  for(let wx2=3;wx2<bw-3;wx2+=8){
+        const key='mid_'+i+'_'+wx2+'_'+wy2;
+
+if(windowCache[key]===undefined){
+  windowCache[key]=Math.random()>0.45;
+}
+
+const on=windowCache[key];
+        px(ctx,bx+wx2,H-14-bh+wy2,5,5,on?CTY.win:CTY.winOff);
+      }
+    }
+  }
+
+  // Street lamps
+  for(let i=0;i<5;i++){
+    const lx=((i*70+scroll*0.5+30)%(W+20))-5;
+    const lh=Math.floor(H*0.18);
+    px(ctx,lx+3,H-14-lh,2,lh,CTY.road);
+    px(ctx,lx,H-14-lh,8,3,CTY.road);
+    px(ctx,lx+2,H-14-lh-3,4,3,CTY.light);
+    // glow
+    ctx.globalAlpha=0.25;px(ctx,lx-4,H-14-lh-6,14,10,CTY.light);ctx.globalAlpha=1;
+  }
+
+  // Road
+  px(ctx,0,H-14,W,14,CTY.road);
+  px(ctx,0,H-14,W,2,CTY.roadH);
+  // Road markings
+  for(let i=0;i<8;i++){
+    const rx=((i*50+scroll)%(W+10))-5;
+    px(ctx,rx,H-8,28,3,CTY.roadH);
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+//  SPRITE: MONKEY  (13×15 dots, half-size cell)
+//  Brown fur
+// ══════════════════════════════════════════════════════════════
+function drawMonkey(ctx,ox,oy,s,mode,fr,jOff=0){
+  const f=fr&1;
+  // extra liveliness while eating (whole-body bounce + slight side sway)
+  const tEat=(mode==='eat')?Math.max(0,Math.min(0.999,G.bananaEat||0)):0;
+  const TAU=Math.PI*2;
+  if(mode==='eat'){
+    const bounce=Math.sin(tEat*TAU*2.6);     // faster bob
+    const sway=Math.sin(tEat*TAU*1.3+0.7);   // slower side sway
+    ox+=Math.round(sway*s*0.6);
+    oy+=Math.round(bounce*s*0.7);
+  }
+  const by=oy+jOff;
+  const ease=t=>t<=0?0:t>=1?1:(t*t*(3-2*t));
+
+  // Head leads body a bit (anime-like bobbing)
+  const headLead=(mode==='eat')?Math.sin(tEat*TAU*2.6+0.9):0;
+  const headSway=(mode==='eat')?Math.sin(tEat*TAU*1.3+1.4):0;
+  // Keep offsets small so neck doesn't detach
+  const hdx=(mode==='eat')?Math.round(headSway*s*0.35):0;
+  const hdy=(mode==='eat')?Math.round(headLead*s*0.35):0;
+  const bodyX=ox, bodyY=by;
+  const headX=ox+hdx, headY=by+hdy;
+
+  // Tail (longer + wag while eating)
+  const wag=(mode==='eat')?Math.round(Math.sin(tEat*TAU*4.2)*s*1.1):0;
+  [
+    [8,6],[9,5],[10,5],[11,6],[12,7],[12,8],[11,9],[10,10],[9,11]
+  ].forEach(([tx,ty])=>{
+    px(ctx,bodyX+tx*s+wag,bodyY+ty*s,s,s,G4.mFur);
+  });
+  px(ctx,bodyX+10*s+wag,bodyY+5*s,2*s,Math.ceil(s*.7),G4.mFurH);
+
+  // Body
+  px(ctx,bodyX+2*s,bodyY+8*s,9*s,4*s,G4.mFur);
+  px(ctx,bodyX+2*s,bodyY+8*s,9*s,s,G4.mFurH);
+  px(ctx,bodyX+3*s,bodyY+9*s,7*s,2*s,G4.mBelly);
+
+  // Neck bridge (prevents visual separation when head leads)
+  const nTop=headY+7*s;
+  const nBot=bodyY+8*s;
+  if(nBot>nTop){
+    // wider bridge so it never looks "decapitated" even with x-sway
+    px(ctx,bodyX+5*s, nTop, 3*s, nBot-nTop, G4.mFur);
+    px(ctx,bodyX+5*s, nTop, 3*s, s, G4.mFurH);
+  }
+
+  // Head
+  px(ctx,headX+2*s,headY+1*s,9*s,6*s,G4.mFur);
+  px(ctx,headX+3*s,headY,7*s,s,G4.mFur);
+  px(ctx,headX+3*s,headY+7*s,7*s,s,G4.mFur);
+  px(ctx,headX+s,headY+2*s,2*s,4*s,G4.mFur);
+  px(ctx,headX+10*s,headY+2*s,2*s,4*s,G4.mFur);
+  px(ctx,headX+3*s,headY+s,7*s,s,G4.mFurH);
+
+  // Face plate
+  px(ctx,headX+3*s,headY+2*s,7*s,4*s,G4.mFace);
+  px(ctx,headX+4*s,headY+s,5*s,s,G4.mFace);
+  px(ctx,headX+3*s,headY+6*s,7*s,s,G4.mFaceH);
+
+  // Ears
+  px(ctx,headX+s,headY+2*s,2*s,2*s,G4.mFur);px(ctx,headX+s,headY+3*s,s,s,G4.mFace);
+  px(ctx,headX+10*s,headY+2*s,2*s,2*s,G4.mFur);px(ctx,headX+11*s,headY+3*s,s,s,G4.mFace);
+
+  // Eyes (blink + happy squint while munching)
+  if(mode==='eat'){
+    const chompT=((tEat*3.2)%1);
+    const chomp=Math.sin(chompT*TAU);
+    const happy=(tEat>0.14&&tEat<0.62&&chomp>0.25);
+    const blink=(G.fc%62===0)||(G.fc%62===1); // pachipachi
+    if(blink){
+      // blink line
+      px(ctx,headX+4*s,headY+4*s,2*s,s,G4.mFurD);
+      px(ctx,headX+8*s,headY+4*s,2*s,s,G4.mFurD);
+    } else if(happy){
+      // closed "smile eyes"
+      px(ctx,headX+4*s,headY+4*s,2*s,s,G4.mFurD);
+      px(ctx,headX+8*s,headY+4*s,2*s,s,G4.mFurD);
+      // tiny sparkle
+      px(ctx,headX+3*s,headY+3*s,s,s,G4.g0);
+    } else {
+      px(ctx,headX+4*s,headY+3*s,2*s,2*s,G4.mEye);px(ctx,headX+4*s,headY+3*s,s,s,G4.g0);
+      px(ctx,headX+8*s,headY+3*s,2*s,2*s,G4.mEye);px(ctx,headX+8*s,headY+3*s,s,s,G4.g0);
+    }
+  } else {
+    px(ctx,headX+4*s,headY+3*s,2*s,2*s,G4.mEye);px(ctx,headX+4*s,headY+3*s,s,s,G4.g0);
+    px(ctx,headX+8*s,headY+3*s,2*s,2*s,G4.mEye);px(ctx,headX+8*s,headY+3*s,s,s,G4.g0);
+  }
+
+  // Nose
+  px(ctx,headX+6*s,headY+5*s,2*s,s,G4.mFurD);
+
+  // Mouth + expression
+  if(mode==='chase'){
+    px(ctx,headX+4*s,headY+6*s,s,s,G4.mFurD);
+    px(ctx,headX+5*s,headY+7*s,3*s,s,G4.mFurD);
+    px(ctx,headX+8*s,headY+6*s,s,s,G4.mFurD);
+    px(ctx,headX+5*s,headY+7*s,3*s,s,G4.g0);
+  } else if(mode==='eat'){
+    // 0..1 progress of "eat loop"
+    const t=Math.max(0,Math.min(0.999,G.bananaEat||0));
+    // Pop, anime-ish munch (faster approach + choppy carry + big chomp frames)
+    const approach=ease(Math.min(1,t/0.12));
+    const retreat=ease(Math.max(0,Math.min(1,(t-0.62)/0.12)));
+    const atMouth=(t>0.14&&t<0.62)?1:0;
+    const carryRaw=approach*(1-retreat);
+    const carry=Math.round(carryRaw*3)/3; // 0, 1/3, 2/3, 1
+
+    const chompT=((t*3.2)%1); // ~3 chomps per loop
+    const chomp=Math.sin(chompT*TAU);
+    const mouthOpen=atMouth && chomp>0.25;
+    const mh=mouthOpen?3*s:s;
+    px(ctx,headX+4*s,headY+6*s,5*s,s,G4.mFurD);
+    if(mh>s)px(ctx,headX+5*s,headY+7*s,3*s,s,G4.mFurD);
+    // rosy cheeks while enjoying
+    if(atMouth){
+      const blush=(chomp>0.6)?G4.mFaceH:G4.mFace;
+      px(ctx,headX+3*s,headY+5*s,s,s,blush);
+      px(ctx,headX+9*s,headY+5*s,s,s,blush);
+    }
+
+    // banana in right hand (always carried to mouth on each loop)
+    const bRem=Math.max(2*s,Math.floor(7*s*(1-(t*0.95))));
+    const handRestX=11*s, handRestY=4*s;
+    // keep banana away from eyes (lower mouth target)
+    const mouthX=6*s, mouthY=7*s;
+    // deterministic jitter (avoid unpleasant random trembling)
+    const jig=mouthOpen?Math.round(Math.sin(t*TAU*8.0)*s*0.6):0;
+    const bob=mouthOpen?Math.round(-(chomp>0.6?1:0)*s):0;
+    const hx=Math.round(handRestX+(mouthX-handRestX)*carry)+jig;
+    const hy=Math.round(handRestY+(mouthY-handRestY)*carry)+bob;
+    const biteNudge=mouthOpen?(-s):0;
+    const bx=ox+hx+biteNudge;
+    const by2=by+hy+biteNudge;
+    // clamp so it never rides up into the eye area
+    const safeY=Math.max(headY+6*s,by2);
+    px(ctx,bx,safeY,bRem,2*s,G4.banana);
+    px(ctx,bx,safeY,bRem,s,G4.bananaH);
+    px(ctx,bx,safeY+s,bRem,s,G4.bananaS);
+    // bite notch near mouth while chewing
+    if(atMouth && chomp>0.15){
+      px(ctx,bx+Math.max(0,bRem-2*s),safeY,s,s,G4.g0);
+      px(ctx,bx+Math.max(0,bRem-3*s),safeY+s,s,s,G4.g0);
+    }
+    // manga-ish motion lines near mouth on big chomp frames
+    if(mouthOpen && chomp>0.55){
+      px(ctx,ox+3*s,by+7*s,s,s,G4.g0);
+      px(ctx,ox+4*s,by+8*s,s,s,G4.g0);
+      px(ctx,ox+9*s,by+7*s,s,s,G4.g0);
+    }
+  } else if(mode==='angry'){
+    px(ctx,ox+4*s,by+6*s,5*s,s,G4.mFurD);
+    px(ctx,ox+3*s,by+2*s,3*s,s,G4.mFurD);
+    px(ctx,ox+7*s,by+2*s,3*s,s,G4.mFurD);
+  } else {
+    px(ctx,ox+5*s,by+6*s,3*s,s,G4.mFur);
+  }
+
+  // Arms
+  if(mode==='chase'){
+    const aO=f?-s:s;
+    px(ctx,bodyX+s,bodyY+9*s+aO,2*s,s,G4.mFur);
+    px(ctx,bodyX+10*s,bodyY+9*s-aO,2*s,s,G4.mFur);
+  } else if(mode==='eat'){
+    px(ctx,bodyX+s,bodyY+9*s,2*s,s,G4.mFur);
+    px(ctx,bodyX+10*s,bodyY+5*s,2*s,5*s,G4.mFur);
+    px(ctx,bodyX+12*s,bodyY+3*s,2*s,2*s,G4.mFur);
+  } else if(mode==='rest'){
+    px(ctx,bodyX+s,bodyY+10*s,2*s,s,G4.mFur);
+    px(ctx,bodyX+10*s,bodyY+10*s,2*s,s,G4.mFur);
+  } else {
+    const ay=f?by+9*s:by+10*s;
+    px(ctx,bodyX+s,ay,2*s,s,G4.mFur);px(ctx,bodyX+10*s,ay,2*s,s,G4.mFur);
+  }
+
+  // Legs
+  px(ctx,bodyX+3*s,bodyY+12*s,3*s,2*s,G4.mFur);
+  px(ctx,bodyX+7*s,bodyY+12*s,3*s,2*s,G4.mFur);
+  px(ctx,bodyX+3*s,bodyY+13*s,4*s,s,G4.mFace);
+  px(ctx,bodyX+7*s,bodyY+13*s,4*s,s,G4.mFace);
+}
+
+// ══════════════════════════════════════════════════════════════
+//  SPRITE: WORKER  (12×20 dots)
+// ══════════════════════════════════════════════════════════════
+function drawWorker(ctx,ox,oy,s,mode,fr){
+  const f=fr&1;
+  const TAU=Math.PI*2;
+  // subtle body motion
+  let bob=0;
+  if(mode==='work') bob=Math.round(Math.sin((G.fc||0)/10)*s*0.7);
+  if(mode==='sweep') bob=Math.round(Math.sin((G.fc||0)/6)*s*0.9);
+  oy+=bob;
+  // Hat
+  px(ctx,ox+2*s,oy,8*s,s,G4.hat);
+  px(ctx,ox+s,oy+s,10*s,s,G4.hat);
+  px(ctx,ox,oy+2*s,12*s,s,G4.hatB);
+  // Head
+  px(ctx,ox+2*s,oy+3*s,8*s,5*s,G4.skin);
+  px(ctx,ox+s,oy+4*s,s,3*s,G4.skin);
+  px(ctx,ox+10*s,oy+4*s,s,3*s,G4.skin);
+  // Face
+  const blink=((G.fc||0)%78===0)||((G.fc||0)%78===1);
+  if(mode==='rest'){
+    px(ctx,ox+3*s,oy+5*s,2*s,s,G4.skinD);px(ctx,ox+7*s,oy+5*s,2*s,s,G4.skinD);
+    px(ctx,ox+4*s,oy+7*s,4*s,s,G4.skin);
+  } else {
+    if(blink){
+      px(ctx,ox+3*s,oy+6*s,2*s,s,G4.skinD);
+      px(ctx,ox+7*s,oy+6*s,2*s,s,G4.skinD);
+    } else {
+      px(ctx,ox+3*s,oy+5*s,2*s,2*s,G4.mEye);px(ctx,ox+3*s,oy+5*s,s,s,G4.g0);
+      px(ctx,ox+7*s,oy+5*s,2*s,2*s,G4.mEye);px(ctx,ox+7*s,oy+5*s,s,s,G4.g0);
+    }
+    // mouth (smile on work, determined on sweep)
+    if(mode==='sweep'){
+      px(ctx,ox+4*s,oy+7*s,4*s,s,G4.skinD);
+      px(ctx,ox+5*s,oy+8*s,2*s,s,G4.skinD);
+    } else {
+      px(ctx,ox+4*s,oy+7*s,4*s,s,G4.skinD);
+      px(ctx,ox+4*s,oy+8*s,s,s,G4.g0);px(ctx,ox+7*s,oy+8*s,s,s,G4.g0);
+    }
+  }
+  // Neck + body
+  px(ctx,ox+4*s,oy+8*s,4*s,s,G4.skin);
+  px(ctx,ox+2*s,oy+9*s,8*s,5*s,G4.shirt);
+  px(ctx,ox+s,oy+10*s,s,3*s,G4.shirt);
+  px(ctx,ox+10*s,oy+10*s,s,3*s,G4.shirt);
+  px(ctx,ox+3*s,oy+11*s,3*s,2*s,G4.pants);
+  // Arms
+  if(mode==='hammer'){
+    px(ctx,ox,oy+10*s,s,4*s,G4.shirt);px(ctx,ox,oy+13*s,2*s,s,G4.skin);
+    const sw=f?0:-2*s;
+    px(ctx,ox+11*s,oy+10*s+sw,s,5*s,G4.shirt);
+    px(ctx,ox+11*s,oy+14*s+sw,2*s,s,G4.skin);
+    px(ctx,ox+12*s,oy+11*s+sw,s,4*s,G4.g1);
+    px(ctx,ox+11*s,oy+10*s+sw,3*s,2*s,G4.g0);
+  } else if(mode==='sweep'){
+    // extra swing to sell sweeping motion
+    // Sweep: arms attached to body, broom swings side to side
+    const swingT=((G.fc||0)/6);
+    const sw2=Math.round(Math.sin(swingT)*s*2); // broom swing offset
+    const armV=Math.round(Math.sin(swingT)*s);  // arm vertical bob
+    // Left arm – attached at shoulder (ox, oy+10s)
+    px(ctx,ox,oy+10*s+armV,s,4*s,G4.shirt);
+    px(ctx,ox,oy+13*s+armV,2*s,s,G4.skin);
+    // Right arm – attached at shoulder (ox+11s, oy+10s)
+    px(ctx,ox+11*s,oy+10*s-armV,s,4*s,G4.shirt);
+    px(ctx,ox+11*s,oy+13*s-armV,2*s,s,G4.skin);
+    // Broom pole (right side, swings)
+    px(ctx,ox+12*s+sw2,oy+7*s,s,10*s,G4.g1);
+    // Broom head
+    px(ctx,ox+10*s+sw2,oy+15*s,5*s,2*s,G4.g2);
+    px(ctx,ox+10*s+sw2,oy+16*s,5*s,s,G4.g1);
+    // Dust puff alternates side
+    if(sw2>=0){
+      px(ctx,ox+9*s,oy+16*s,2*s,s,G4.g2);px(ctx,ox+8*s,oy+15*s,s,s,G4.g2);
+    } else {
+      px(ctx,ox+12*s,oy+16*s,2*s,s,G4.g2);px(ctx,ox+13*s,oy+15*s,s,s,G4.g2);
+    }
+  } else if(mode==='rest'){
+    px(ctx,ox,oy+10*s,s,5*s,G4.shirt);px(ctx,ox,oy+14*s,2*s,s,G4.skin);
+    px(ctx,ox+11*s,oy+10*s,s,5*s,G4.shirt);px(ctx,ox+11*s,oy+14*s,2*s,s,G4.skin);
+  } else {
+    const ay=f?oy+10*s:oy+11*s;
+    px(ctx,ox,ay,s,4*s,G4.shirt);px(ctx,ox,ay+3*s,2*s,s,G4.skin);
+    px(ctx,ox+11*s,ay,s,4*s,G4.shirt);px(ctx,ox+11*s,ay+3*s,2*s,s,G4.skin);
+  }
+  // Pants+boots
+  px(ctx,ox+2*s,oy+14*s,4*s,4*s,G4.pants);px(ctx,ox+6*s,oy+14*s,4*s,4*s,G4.pants);
+  px(ctx,ox+5*s,oy+14*s,s,4*s,G4.pantsD);px(ctx,ox+2*s,oy+14*s,s,4*s,G4.g0);
+  px(ctx,ox+s,oy+17*s,5*s,3*s,G4.boot);px(ctx,ox+6*s,oy+17*s,5*s,3*s,G4.boot);
+  px(ctx,ox+s,oy+17*s,5*s,s,G4.g3);px(ctx,ox+6*s,oy+17*s,5*s,s,G4.g3);
+}
+
+// ══════════════════════════════════════════════════════════════
+//  SPRITE: PEEL  (8×9 dots)
+// ══════════════════════════════════════════════════════════════
+function drawPeel(ctx,ox,oy,s){
+  // Higher-res peel (12×12-ish): 3 flaps + thicker rim + inner
+  // stem + top rim
+  px(ctx,ox+5*s,oy,2*s,s,G4.peelS);
+  px(ctx,ox+4*s,oy+s,4*s,s,G4.peel);
+  px(ctx,ox+4*s,oy+2*s,4*s,s,G4.peelH);
+
+  // center flap
+  px(ctx,ox+4*s,oy+3*s,4*s,7*s,G4.peel);
+  px(ctx,ox+4*s,oy+3*s,4*s,s,G4.peelH);
+  px(ctx,ox+5*s,oy+4*s,2*s,4*s,G4.peelIn);
+  px(ctx,ox+4*s,oy+10*s,4*s,s,G4.peelS);
+
+  // left flap
+  px(ctx,ox+s,oy+4*s,2*s,6*s,G4.peel);
+  px(ctx,ox+3*s,oy+3*s,s,8*s,G4.peel);
+  px(ctx,ox+3*s,oy+3*s,s,s,G4.peelH);
+  px(ctx,ox,oy+7*s,s,3*s,G4.peel);
+  px(ctx,ox+2*s,oy+10*s,3*s,s,G4.peelS);
+
+  // right flap
+  px(ctx,ox+9*s,oy+3*s,s,8*s,G4.peel);
+  px(ctx,ox+9*s,oy+3*s,s,s,G4.peelH);
+  px(ctx,ox+10*s,oy+4*s,2*s,6*s,G4.peel);
+  px(ctx,ox+11*s,oy+7*s,s,3*s,G4.peel);
+  px(ctx,ox+7*s,oy+10*s,3*s,s,G4.peelS);
+}
+
+// ══════════════════════════════════════════════════════════════
+//  SPRITE: CASTLE ICON  (small)
+// ══════════════════════════════════════════════════════════════
+function drawCastleIcon(ctx,ox,oy,s,corrupt){
+  const cA=corrupt>0.5?G4.brkBad:G4.csA, cH=corrupt>0.5?G4.brkBadB:G4.csH;
+  const fl=corrupt>0.5?G4.banana:G4.g1;
+  px(ctx,ox,oy+2*s,3*s,10*s,cA);px(ctx,ox,oy,2*s,2*s,cH);px(ctx,ox,oy+2*s,s,10*s,cH);
+  px(ctx,ox+3*s,oy+4*s,6*s,8*s,cA);px(ctx,ox+4*s,oy+3*s,4*s,s,cH);px(ctx,ox+3*s,oy+4*s,s,8*s,cH);
+  px(ctx,ox+9*s,oy+2*s,3*s,10*s,cA);px(ctx,ox+10*s,oy,2*s,2*s,cH);px(ctx,ox+9*s,oy+2*s,s,10*s,cH);
+  px(ctx,ox+5*s,oy+8*s,2*s,4*s,G4.g3);px(ctx,ox+4*s,oy+9*s,4*s,3*s,G4.g3);
+  px(ctx,ox+5*s,oy+5*s,2*s,2*s,fl);
+  px(ctx,ox+5*s,oy-s,s,3*s,cH);px(ctx,ox+6*s,oy-s,2*s,s,fl);
+}
+
+// ══════════════════════════════════════════════════════════════
+//  SPRITE: TRASH CAN  (grey/metal, small, banana peeking out)
+// ══════════════════════════════════════════════════════════════
+function drawTrash(ctx,ox,oy,s,hasExtra){
+  // Banana peek over rim (before drawing lid)
+  if(hasExtra){
+    px(ctx,ox+s,oy+s,3*s,s,G4.peel);    // peel sticking out
+    px(ctx,ox+2*s,oy,2*s,s,G4.banana);  // banana tip visible
+  }
+  // Lid handle
+  px(ctx,ox+s,oy+s,2*s,s,G4.trashHi);
+  // Lid
+  px(ctx,ox,oy+2*s,4*s,s,G4.trashLid);
+  // Bin
+  px(ctx,ox,oy+3*s,4*s,4*s,G4.trashBin);
+  px(ctx,ox,oy+3*s,s,4*s,G4.trashHi);
+  px(ctx,ox+3*s,oy+3*s,s,4*s,G4.trashDk);
+  // Stripes
+  px(ctx,ox+s,oy+4*s,s,2*s,G4.trashHi);px(ctx,ox+2*s,oy+4*s,s,2*s,G4.trashHi);
+  // Bottom
+  px(ctx,ox,oy+6*s,4*s,s,G4.trashDk);
+}
+
+// ══════════════════════════════════════════════════════════════
+//  TOP SCREEN  (Jungle + Monkey)
+// ══════════════════════════════════════════════════════════════
+function drawTop(){
+  const ctx=topCtx, W=SW, H=SH;
+
+  // 前フレーム消去
+  ctx.clearRect(0,0,W,H);
+
+  const mActive=G.mode==='monkey';
+
+  // Jungle BG
+  drawJungle(ctx,W,H,Math.floor(G.bgScroll));
+  // Ground strip
+  px(ctx,0,H-12,W,12,JNG.gnd);px(ctx,0,H-12,W,2,JNG.gndH);
+
+  // (Trash feature removed) — no trash icons
+
+  // MONKEY time (top-right) – hidden in setup
+  if(!paused && G.mode!=='setup'){
+    const t=fmt(G.monkeySec);
+    const pad=3;
+    ctx.font=`bold ${UI_TIMER_FS}px 'Courier New'`;
+    const tw=Math.ceil(ctx.measureText(t).width);
+    const bx=W-tw-pad*2-4, by=4;
+    const bh=UI_TIMER_FS+8;
+    ctx.globalAlpha=0.85;px(ctx,bx,by,tw+pad*2,bh,G4.g3);ctx.globalAlpha=1;
+    ctx.fillStyle=G4.g0;ctx.textAlign='left';ctx.fillText(t,bx+pad,by+bh-4);
+  }
+
+  // Peels flying (phase A) – thrown from monkey hand to bottom screen
+  const ps=peelS();
+  G.peels.filter(p=>p.phase==='A'&&p.gy<H).forEach(p=>{
+    const wob=Math.round(Math.sin((p.gy+p.gx)*0.05)*ps*0.6);
+    ctx.globalAlpha=0.9;
+    drawPeel(ctx,Math.round(p.gx+wob),Math.round(p.gy),ps);
+    ctx.globalAlpha=1;
+  });
+  // (phase C removed)
+
+  // Monkey
+  const ms=monkeyS(), mfr=Math.floor(G.fc/7)%2;
+  const mMode=mActive?'eat':'chase';
+
+  // ── SETUP MODE: idle monkey in top screen ──
+  if(G.mode==='setup'){
+    // Draw idle monkey
+    const iMode = G.likeAnim>0 ? 'chase' : (G.idleMode==='sleep'?'rest': G.idleMode==='sit'?'rest':'chase');
+    const iJump = G.likeAnim>0 ? Math.round(Math.sin(G.likeAnim*8)*ms*5) : (G.idleMode==='walk'?Math.round(Math.sin(G.fc*0.25)*ms*1.5):0);
+    drawMonkey(ctx,Math.round(G.idleX),H-12-14*ms,ms,iMode,mfr,iJump);
+    // Hearts after like
+    G.hearts.forEach(h=>{
+      ctx.globalAlpha=Math.max(0,h.a);
+      ctx.font=`${Math.max(10,Math.floor(ms*3))}px sans-serif`;
+      ctx.textAlign='center';
+      ctx.fillText('❤️',Math.round(h.x),Math.round(h.y));
+      ctx.textAlign='left';
+      ctx.globalAlpha=1;
+    });
+    return;
+  }
+
+  if(paused){
+    // Let monkey play using the whole screen (no centered/stationary monkey)
+    const travelX=Math.max(0,W-ms*14);
+    const travelY=Math.max(0,H-12-14*ms);
+    // run around the perimeter so it doesn't overlap the big clock in the center
+    const speed=0.12; // laps/sec (calmer)
+    const t=(G.pauseDance*speed);
+    const seg=Math.floor(t)%4;
+    const u=t-Math.floor(t);
+    const lerp=(a,b,p)=>a+(b-a)*p;
+    const pad=ms*2;
+    let x=0,y=0;
+    if(seg===0){ x=lerp(pad,travelX-pad,u); y=pad; }
+    else if(seg===1){ x=travelX-pad; y=lerp(pad,travelY-pad,u); }
+    else if(seg===2){ x=lerp(travelX-pad,pad,u); y=travelY-pad; }
+    else { x=pad; y=lerp(travelY-pad,pad,u); }
+    x=Math.round(x); y=Math.round(y);
+    const hop=Math.sin(G.pauseDance*4.2)*ms*4 + Math.sin(G.pauseDance*1.8)*ms*1;
+    const jOff=Math.round(hop);
+    drawMonkey(ctx,x,y,ms,'chase',mfr,jOff);
+  } else {
+    const jOff=Math.round(G.monkeyJump);
+    drawMonkey(ctx,Math.round(G.monkeyX),H-12-14*ms,ms,mMode,mfr,jOff);
+  }
+
+  // Speech bubble – Cheer message (timer-based, fades out)
+  if(G.cheerMsgVisible && !mActive && G.mode==='work' && !paused){
+    const mx2=Math.round(G.monkeyX);
+    const fs=Math.max(10,Math.floor(W/18));
+    const lineH=fs+5;
+    const words=G.cheerMsg.split(' ');
+    let line1='',line2='';
+    words.forEach(w=>{if((line1+' '+w).trim().length<=13)line1=(line1+' '+w).trim();else line2=(line2+' '+w).trim();});
+    const lines=line2?[line1,line2]:[line1];
+    const bh=lines.length*lineH+16;
+    ctx.font=`bold ${fs}px 'Courier New'`;
+    const maxTW=Math.max(...lines.map(ln=>ctx.measureText(ln).width));
+    const bw=Math.min(Math.ceil(maxTW)+20,W-10);
+    const bx=Math.max(2,Math.min(mx2+ms*2,W-bw-4));
+    const by=Math.max(4,H-12-14*ms-bh-ms*2);
+    const fade=Math.min(1,G.cheerMsgTimer);
+    ctx.globalAlpha=fade;
+    px(ctx,bx+2,by+2,bw,bh,G4.g3);
+    px(ctx,bx,by,bw,bh,G4.g0);
+    px(ctx,bx,by,bw,2,G4.g2);px(ctx,bx,by+bh-2,bw,2,G4.g2);
+    px(ctx,bx,by,2,bh,G4.g2);px(ctx,bx+bw-2,by,2,bh,G4.g2);
+    px(ctx,bx+4,by+bh,4,4,G4.g0);
+    ctx.fillStyle=G4.g3;
+    ctx.textAlign='center';
+    lines.forEach((ln,i)=>{ctx.fillText(ln,bx+bw/2,by+8+fs+(i*lineH));});
+    ctx.textAlign='left';
+    ctx.globalAlpha=1;
+  }
+
+  // (Angry bubble removed)
+
+  // ── Monkey fact bubble (MONKEY mode, timer-based) ──
+  if(G.monkeyMsgVisible && mActive && !paused){
+    const mx2=Math.round(G.monkeyX);
+    const fs=Math.max(9,Math.floor(W/19));
+    const lineH=fs+5;
+    const lines=G.monkeyMsg.split('\n');
+    ctx.font=`bold ${fs}px 'Courier New'`;
+    const maxTW=Math.max(...lines.map(l=>ctx.measureText(l).width));
+    const bw=Math.min(Math.ceil(maxTW)+20,W-8);
+    const bh=lines.length*lineH+14;
+    // Position: left of monkey if near right edge, else right
+    let bx=mx2+ms*14+4;
+    if(bx+bw>W-4) bx=mx2-bw-4;
+    bx=Math.max(2,bx);
+    const by=Math.max(4,H-12-14*ms-bh-ms);
+    const fade=Math.min(1,G.monkeyMsgTimer);
+    ctx.globalAlpha=fade;
+    // Shadow
+    px(ctx,bx+2,by+2,bw,bh,G4.g3);
+    // Bubble bg (warm banana tint for monkey facts)
+    px(ctx,bx,by,bw,bh,'#1a1400');
+    px(ctx,bx,by,bw,2,'#c8a800');px(ctx,bx,by+bh-2,bw,2,'#c8a800');
+    px(ctx,bx,by,2,bh,'#c8a800');px(ctx,bx+bw-2,by,2,bh,'#c8a800');
+    // Tail toward monkey
+    const tailX=mx2+ms*13 > bx ? bx : bx+bw;
+    px(ctx,tailX>bx?bx:bx+bw-5,by+Math.floor(bh/2),5,4,'#1a1400');
+    ctx.fillStyle='#f0d020';
+    ctx.font=`bold ${fs}px 'Courier New'`;
+    ctx.textAlign='center';
+    lines.forEach((ln,i)=>ctx.fillText(ln,bx+bw/2,by+8+fs+i*lineH));
+    ctx.textAlign='left';
+    ctx.globalAlpha=1;
+  }
+
+  // PAUSED: show clock overlay
+  if(paused){
+    ctx.fillStyle='rgba(0,10,5,0.72)';ctx.fillRect(0,0,W,H);
+    const now=new Date();
+    const hh=now.getHours().toString().padStart(2,'0');
+    const mm=now.getMinutes().toString().padStart(2,'0');
+    const ss=now.getSeconds().toString().padStart(2,'0');
+    const ds=now.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+    const fs=Math.max(18,Math.floor(W/9));
+    ctx.fillStyle=G4.g1;
+    ctx.font=`bold ${Math.max(8,Math.floor(H/22))}px 'Courier New'`;
+    ctx.textAlign='center';
+    ctx.fillText('⏸  PAUSED',W/2,H*0.16);
+    ctx.fillStyle=G4.g0;
+    ctx.font=`bold ${fs}px 'Courier New'`;
+    ctx.fillText(`${hh}:${mm}:${ss}`,W/2,H*0.52);
+    ctx.fillStyle=G4.g1;
+    ctx.font=`bold ${Math.max(8,Math.floor(fs*.55))}px 'Courier New'`;
+    ctx.fillText(ds,W/2,H*0.70);
+    ctx.fillStyle=G4.g2;
+    ctx.font=`${Math.max(7,Math.floor(H/28))}px 'Courier New'`;
+    ctx.fillText('TAP PAUSE TO RESUME',W/2,H*0.87);
+    ctx.textAlign='left';
+  }
+
+  // Castle flash
+  if(G.castleFlash>0){ctx.globalAlpha=G.castleFlash*.3;ctx.fillStyle=G4.g0;ctx.fillRect(0,0,W,H);ctx.globalAlpha=1;}
+
+  // Screen label + online count
+  if(!paused){
+    ctx.fillStyle=mActive?G4.g1:G4.g2;
+    const _lfsM=Math.max(10,Math.floor(H/20));
+    ctx.font=`bold ${_lfsM}px 'Courier New'`;
+    const _lyM=Math.max(_lfsM+2,Math.floor(H/18)+2);
+    ctx.fillText('MONKEY',5,_lyM);
+    if(!mActive){ctx.globalAlpha=0.15;ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);ctx.globalAlpha=1;}
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+//  BOTTOM SCREEN  (City + Work)
+// ══════════════════════════════════════════════════════════════
+function drawBot(){
+  const ctx=botCtx, W=SW, H=SH;
+
+  // 前フレーム消去
+  ctx.clearRect(0,0,W,H);
+
+  const wActive=G.mode==='work';
+
+  // City BG
+  drawCity(ctx,W,H,Math.floor(G.bgScroll));
+
+  // Castles (left side, small icons) – auto-fit all castles
+  {
+    const maxCastles=Math.max(1,G.castleList.length);
+    const maxAreaW=Math.floor(W*0.46);
+    // shrink icon size so all castles fit, min dot=1
+    const csRaw=Math.max(1,Math.floor(SH/65));
+    const ciWRaw=12*csRaw+2;
+    const cs=(ciWRaw*maxCastles<=maxAreaW)?csRaw:Math.max(1,Math.floor(maxAreaW/(maxCastles*13)));
+    const ciW=12*cs+2;
+    const ciY=groundY()-12*cs;
+    G.castleList.forEach((c,i)=>{
+      const cx=3+i*ciW;
+      drawCastleIcon(ctx,cx,ciY,cs,c.corrupt);
+    });
+  }
+  if(G.castleFlash>0){ctx.globalAlpha=G.castleFlash*.35;ctx.fillStyle=G4.g0;ctx.fillRect(0,0,W,H);ctx.globalAlpha=1;}
+
+  // Building
+  const bW=brickW(),bX=brickX(),bUW=brickUW();
+  const rH=rowH(),bH=Math.max(4,rH-1);
+  for(let i=0;i<G.rows;i++){
+    const ry=groundY()-(i+1)*rH;
+    const bad=G.corruption>0.35&&i<Math.ceil(G.rows*G.corruption*.6);
+    // Main face
+    px(ctx,bX,ry,bW,rH-1,bad?G4.brkBad:G4.brkA);
+    // Top highlight (sky-lit upper edge)
+    px(ctx,bX,ry,bW,2,bad?G4.brkBadB:G4.brkB);
+    // Bottom shadow (each row casts shadow on row below)
+    px(ctx,bX,ry+rH-3,bW,2,bad?G4.brkBad:G4.brkShd);
+    // Left edge slight highlight
+    px(ctx,bX,ry,2,rH-1,bad?G4.brkBadB:G4.brkB);
+    // Right edge: warm street-lamp reflection
+    px(ctx,bX+bW-3,ry,3,rH-1,bad?G4.brkBad:G4.brkLit);
+    // Mortar (bottom + vertical dividers)
+    px(ctx,bX,ry+rH-1,bW,1,G4.brkMort);
+    for(let j=1;j<6;j++)px(ctx,bX+j*bUW,ry,1,rH-1,G4.brkMort);
+  }
+  const crY=groundY()-G.rows*rH-bH-1;
+  for(let i=0;i<G.bricks;i++){
+    const bx2=bX+i*bUW;
+    const bw2=bUW-1;
+    // Main face
+    px(ctx,bx2,crY,bw2,bH,G4.brkA);
+    // Top highlight
+    px(ctx,bx2,crY,bw2,2,G4.brkB);
+    // Bottom shadow
+    px(ctx,bx2,crY+bH-2,bw2,2,G4.brkShd);
+    // Left highlight
+    px(ctx,bx2,crY,2,bH,G4.brkB);
+    // Right street-lamp reflection
+    px(ctx,bx2+bw2-3,crY,3,bH,G4.brkLit);
+    // Vertical mortar
+    if(i>0) px(ctx,bx2,crY,1,bH,G4.brkMort);
+  }
+  if(G.brickPartW>1&&G.bricks<6){
+    const bx2=bX+G.bricks*bUW;
+    px(ctx,bx2,crY,G.brickPartW,bH,G4.brkA);
+    px(ctx,bx2,crY,G.brickPartW,2,G4.brkB);
+  }
+  if(G.brickFlash>0){ctx.globalAlpha=G.brickFlash*.5;px(ctx,bX+Math.max(0,G.bricks-1)*bUW,crY,bUW,bH,G4.g0);ctx.globalAlpha=1;}
+  if(G.rowFlash>0){ctx.globalAlpha=G.rowFlash*.4;px(ctx,bX-2,groundY()-G.rows*rH-2,bW+4,rH+2,G4.g1);ctx.globalAlpha=1;}
+
+  // Crane
+  const crX=bX+bW+8,bTop=groundY()-G.rows*rH,cTop=Math.max(4,bTop-16);
+  px(ctx,crX,cTop,3,groundY()-cTop,G4.g2);px(ctx,crX-12,cTop,16,3,G4.g2);
+  px(ctx,crX-6,cTop,1,Math.min(16,bTop-cTop+6),G4.g1);
+  if(wActive&&G.rows<10){
+    const hy=cTop+Math.min(16,bTop-cTop+4);
+    px(ctx,crX-9,hy,9,4,G.brickFlash>.5?G4.g0:G4.brkA);px(ctx,crX-9,hy,9,2,G4.brkB);
+  }
+
+  // Peels (flying + on floor)
+  const ps=peelS();
+  G.peels.filter(p=>p.phase==='A'&&p.gy>=SH).forEach(p=>{
+    const wob=Math.round(Math.sin((p.gy+p.gx)*0.05)*ps*0.6);
+    ctx.globalAlpha=0.95;
+    drawPeel(ctx,Math.round(p.gx+wob),Math.round(p.gy-SH),ps);
+    ctx.globalAlpha=1;
+  });
+
+  // Peels on floor (phase B)
+  G.peels.filter(p=>p.phase==='B').forEach(p=>drawPeel(ctx,p.x,Math.round(p.fy),ps));
+
+  // Worker
+  const ws=workerS(),wfr=Math.floor(G.fc/8)%2;
+  const wx=Math.round(G.workerX)-6*ws,wy=groundY()-20*ws;
+  const wMode=(wActive&&G.hammerFlash>0)?'hammer':G.workerMode;
+  drawWorker(ctx,wx,wy,ws,wMode,wfr);
+
+  // Worker speech bubble
+  if(G.workerMsgVisible && !paused && (G.mode==='work'||G.mode==='monkey')){
+    const fs=Math.max(9,Math.floor(W/20));
+    const lineH=fs+4;
+    const lines=G.workerMsg.split('\n');
+    ctx.font=`bold ${fs}px 'Courier New'`;
+    const maxTW=Math.max(...lines.map(l=>ctx.measureText(l).width));
+    const bw=Math.ceil(maxTW)+18;
+    const bh=lines.length*lineH+14;
+    // Position: above worker head, prefer left side if near right edge
+    const wbx=Math.round(G.workerX)-6*ws;
+    let bubX=wbx-Math.floor(bw/2)+6*ws;
+    if(bubX+bw>W-4) bubX=W-bw-4;
+    if(bubX<2) bubX=2;
+    const bubY=wy-bh-4;
+    // Fade out in last 1s
+    const fade=Math.min(1,G.workerMsgTimer);
+    ctx.globalAlpha=fade;
+    // shadow
+    px(ctx,bubX+2,bubY+2,bw,bh,G4.g3);
+    // bg (slightly warm tint for work, cool for sleep)
+    const bubBg=G.mode==='monkey'?'#0a1828':'#0a2018';
+    const bubBorder=G.mode==='monkey'?'#1a3848':'#1a4828';
+    px(ctx,bubX,bubY,bw,bh,bubBg);
+    px(ctx,bubX,bubY,bw,2,bubBorder);
+    px(ctx,bubX,bubY+bh-2,bw,2,bubBorder);
+    px(ctx,bubX,bubY,2,bh,bubBorder);
+    px(ctx,bubX+bw-2,bubY,2,bh,bubBorder);
+    // tail pointing down to worker
+    const tailX=Math.max(bubX+6,Math.min(bubX+bw-10,wbx+6*ws));
+    px(ctx,tailX,bubY+bh,4,4,bubBg);
+    px(ctx,tailX+1,bubY+bh+4,2,2,bubBg);
+    // text
+    ctx.fillStyle=G.mode==='monkey'?'#88c8e8':G4.g1;
+    ctx.font=`bold ${fs}px 'Courier New'`;
+    ctx.textAlign='center';
+    lines.forEach((ln,i)=>ctx.fillText(ln,bubX+bw/2,bubY+8+fs+i*lineH));
+    ctx.textAlign='left';
+    ctx.globalAlpha=1;
+  }
+
+  // Zzz (monkey mode)
+  if(G.mode==='monkey'){
+    G.zz.forEach(z=>{
+      ctx.globalAlpha=Math.max(0,z.a);ctx.fillStyle=G4.g1;
+      ctx.font=`bold ${Math.max(9,ws*3)}px 'Courier New'`;
+      ctx.fillText('z',z.x,z.y);ctx.globalAlpha=1;
+    });
+  }
+
+  // Sweep indicator
+  const dirty=G.peels.filter(p=>p.phase==='B').length;
+  if(dirty>0&&wActive&&!paused){
+    px(ctx,0,H-14,W,14,G4.g3);
+    ctx.fillStyle=G4.banana;
+    ctx.font=`bold ${Math.max(8,Math.floor(H/22))}px 'Courier New'`;
+    ctx.fillText(`🍌 CLEAN x${dirty}`,5,H-3);
+  }
+
+  // PAUSED: calendar overlay
+  if(paused){
+    ctx.fillStyle='rgba(0,5,10,0.75)';ctx.fillRect(0,0,W,H);
+    const now=new Date();
+    const today=now.getDate(),month=now.getMonth(),year=now.getFullYear();
+    const mName=now.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+    const firstDay=new Date(year,month,1).getDay();
+    const daysInMonth=new Date(year,month+1,0).getDate();
+    const hdrH=Math.max(9,Math.floor(H/22));
+    ctx.fillStyle=G4.g0;ctx.font=`bold ${hdrH}px 'Courier New'`;ctx.textAlign='center';
+    ctx.fillText(mName,W/2,hdrH+4);
+    const days=['Su','Mo','Tu','We','Th','Fr','Sa'];
+    const padX=6, padB=10;
+    const gridTop=hdrH*2+18;
+    const cellW=Math.floor((W-padX*2)/7);
+    const startX=Math.floor((W-cellW*7)/2);
+    const cellH=Math.max(12,Math.floor((H-gridTop-padB)/6.6));
+    const hY=gridTop;
+    const sf=Math.max(6,Math.floor(cellH*0.52));
+    ctx.fillStyle=G4.g2;ctx.font=`bold ${sf}px 'Courier New'`;
+    days.forEach((d,i)=>ctx.fillText(d,startX+i*cellW+Math.floor(cellW/2),hY));
+    let dn=1;
+    for(let row=0;row<6&&dn<=daysInMonth;row++){
+      for(let col=0;col<7&&dn<=daysInMonth;col++){
+        if(row===0&&col<firstDay)continue;
+        const cx=startX+col*cellW;
+        const cy=hY+10+row*cellH; // cell top
+        const isT=dn===today;
+        if(isT){
+          ctx.fillStyle=G4.g1;
+          ctx.fillRect(cx+1,cy+1,cellW-2,cellH-2);
+          ctx.fillStyle=G4.g3;
+        } else {
+          ctx.fillStyle=G4.g0;
+        }
+        ctx.font=`bold ${sf}px 'Courier New'`;
+        ctx.textBaseline='middle';
+        ctx.fillText(dn.toString(),cx+Math.floor(cellW/2),cy+Math.floor(cellH/2));
+        ctx.textBaseline='alphabetic';
+        dn++;
+      }
+    }
+    ctx.textAlign='left';
+  }
+
+  // Label
+  if(!paused){
+    // WORK time (top-right) — draw late so it stays visible
+    const t=fmt(G.workSec);
+    const pad=3;
+    ctx.font=`bold ${UI_TIMER_FS}px 'Courier New'`;
+    const tw=Math.ceil(ctx.measureText(t).width);
+    const bx=W-tw-pad*2-4, by=4;
+    const bh=UI_TIMER_FS+8;
+    ctx.globalAlpha=0.85;px(ctx,bx,by,tw+pad*2,bh,G4.g3);ctx.globalAlpha=1;
+    ctx.fillStyle=G4.g0;ctx.textAlign='left';ctx.fillText(t,bx+pad,by+bh-4);
+
+    ctx.fillStyle=wActive?G4.g1:G4.g2;
+    const _lfsW=Math.max(10,Math.floor(H/20));
+    ctx.font=`bold ${_lfsW}px 'Courier New'`;
+    const _lyW=Math.max(_lfsW+2,Math.floor(H/18)+2);
+    ctx.fillText('WORK',5,_lyW);
+    if(!wActive){ctx.globalAlpha=0.15;ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);ctx.globalAlpha=1;}
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+//  MAIN LOOP
+// ══════════════════════════════════════════════════════════════
+let lastTs=0;
+function loop(ts){
+  requestAnimationFrame(loop);
+  const dt=Math.min((ts-lastTs)/1000,0.1);lastTs=ts;
+  if(G.mode==='ended')return;
+
+  if(paused){
+    G.pauseDance+=dt*1.8;
+    drawTop();drawBot();return;
+  }
+
+  G.fc++;
+  G.brickFlash=Math.max(0,G.brickFlash-dt*3);
+
+  // ── Show likes-overlay only in setup ──
+  {
+    const lov=document.getElementById('likes-overlay');
+    if(lov){
+      if(G.mode==='setup') lov.classList.add('visible');
+      else lov.classList.remove('visible');
+    }
+  }
+
+  // ── SETUP MODE: idle monkey logic ──
+  if(G.mode==='setup'){
+    const ms2=monkeyS();
+    G.bgScroll=(G.bgScroll+dt*18)%10000;
+    const el=document.getElementById('total-badge');
+    if(el) el.textContent=`⏳ ${fmtRemain(G.targetSec)}`;
+    // Hearts float up
+    G.hearts.forEach(h=>{h.y-=55*dt;h.a-=dt*0.55;});
+    G.hearts=G.hearts.filter(h=>h.a>0);
+    // Like dance timer
+    if(G.likeAnim>0){
+      G.likeAnim=Math.max(0,G.likeAnim-dt);
+      G.idleMode='walk';
+    }
+    // Idle behavior timer
+    G.idleTimer-=dt;
+    if(G.idleTimer<=0){
+      const r=Math.random();
+      if(r<0.45){
+        G.idleMode='walk';
+        G.idleTargetX=Math.floor(ms2*2+Math.random()*(SW-ms2*16));
+        G.idleTimer=1.8+Math.random()*2.5;
+      } else if(r<0.70){
+        G.idleMode='sit';
+        G.idleTimer=1.2+Math.random()*2.0;
+      } else {
+        G.idleMode='sleep';
+        G.idleTimer=2.0+Math.random()*3.0;
+      }
+    }
+    // Move toward target when walking
+    if(G.idleMode==='walk'){
+      const spd=ms2*30;
+      const dx=G.idleTargetX-G.idleX;
+      if(Math.abs(dx)>spd*dt){
+        G.idleX+=Math.sign(dx)*spd*dt;
+      } else {
+        G.idleX=G.idleTargetX;
+        G.idleMode='sit';
+        G.idleTimer=0.8+Math.random()*1.5;
+      }
+    }
+    G.idleX=Math.max(ms2*2,Math.min(SW-ms2*15,G.idleX));
+    drawTop();drawBot();
+    return;
+  }
+  G.rowFlash=Math.max(0,G.rowFlash-dt*2);
+  G.castleFlash=Math.max(0,G.castleFlash-dt*1.5);
+  G.hammerFlash=Math.max(0,G.hammerFlash-dt*2.5);
+  G.bgScroll=(G.bgScroll+dt*18)%10000;
+
+  // Worker smooth move
+  G.workerX+=(G.workerTargetX-G.workerX)*Math.min(1,dt*7);
+  // Monkey smooth move + jump (chase mode)
+  G.monkeyX+=(G.monkeyTargetX-G.monkeyX)*Math.min(1,dt*3.5);
+  if(G.mode==='work'){
+    G.monkeyBounceT+=dt;
+    if(G.monkeyBounceT>0.42){G.monkeyBounceT=0;G.monkeyJumpV=-monkeyS()*6;}
+    G.monkeyJumpV+=monkeyS()*30*dt;
+    G.monkeyJump+=G.monkeyJumpV*dt;
+    if(G.monkeyJump>0){G.monkeyJump=0;G.monkeyJumpV=0;}
+  } else {
+    G.monkeyJump=0;G.monkeyJumpV=0;G.monkeyBounceT=0;
+  }
+
+  // Peel physics
+  const ps=peelS();
+  G.peels.forEach(p=>{
+    if(p.phase==='A'){
+      p.vy+=p.grav*dt;
+      p.gx+=p.vx*dt;
+      p.gy+=p.vy*dt;
+      // bounce off sides a bit to keep within screen
+      if(p.gx<2){p.gx=2;p.vx=Math.abs(p.vx)*0.85;}
+      if(p.gx>SW-10){p.gx=SW-10;p.vx=-Math.abs(p.vx)*0.85;}
+      // land on bottom screen floor
+      if(p.gy>=SH+p.landY){
+        p.phase='B';
+        p.x=Math.round(Math.max(2,Math.min(SW-ps*12-2,p.gx)));
+        p.fy=p.landY;
+      }
+    }
+    else if(p.phase==='B'){if(p.fy<p.landY)p.fy=Math.min(p.landY,p.fy+p.spd*dt);}
+  });
+  G.peels=G.peels.filter(p=>p.phase!=='D');
+
+  // Banana eat loop (monkey screen)
+  if(G.mode==='monkey'){
+    // Keep roughly the old pace (previously: bananaEat += dt*0.07 → 1 loop ≒ 14.3s)
+    // Pop feel (slightly faster than the old loop, but not frantic)
+    const cycle=9.6; // seconds per eat→throw loop
+    G.eatCycleT+=dt;
+    if(G.eatCycleT>=cycle){
+      G.eatCycleT-=cycle;
+      spawnPeel();
+    }
+    G.bananaEat=G.eatCycleT/cycle; // 0..1
+  }
+  else {G.bananaEat=0;G.eatCycleT=0;}
+
+  // ── MONKEY MODE ─────────────────────────────────────────────
+  if(G.mode==='monkey'){
+    G.monkeySec+=dt;
+    G.zzTimer+=dt;
+    if(G.zzTimer>1.6){
+      G.zzTimer=0;
+      const ws=workerS();G.zz.push({x:Math.round(G.workerX)+ws*4,y:groundY()-ws*12,a:1,vy:-22});
+    }
+    G.zz.forEach(z=>{z.y+=z.vy*dt;z.a-=dt*.55;});G.zz=G.zz.filter(z=>z.a>0);
+    G.workerMode='rest';G.workerTargetX=SW*0.20;
+    G.monkeyTargetX=SW*0.55;
+  }
+
+  // ── WORK MODE ────────────────────────────────────────────────
+  if(G.mode==='work'){
+    G.workSec+=dt;
+
+    const dirtyIdx=G.peels.findIndex(p=>p.phase==='B'&&p.fy>=p.landY);
+    if(dirtyIdx>=0){
+      const p=G.peels[dirtyIdx];
+      G.workerMode='sweep';G.hammerFlash=0;
+      G.workerTargetX=Math.min(SW*.88,Math.max(SW*.05,p.x+10));
+      p.cleanT=(p.cleanT||0)+dt;
+      if(p.cleanT>=4){p.phase='D';snd('sweep');}
+    } else {
+      G.workerMode='work';
+      // Worker follows current brick position
+      const nB=G.bricks;
+      const tBX=brickX()+nB*brickUW()+Math.floor(brickUW()/2);
+      G.workerTargetX=Math.min(SW*.90,tBX+workerS()*2);
+
+      G.brickTimer+=dt;
+      G.brickPartW=Math.floor((G.brickTimer/10)*brickUW());
+
+      if(G.brickTimer>=10){
+        G.brickTimer-=10;G.bricks++;G.brickPartW=0;
+        G.brickFlash=1;G.hammerFlash=1;snd('brick');
+        if(G.bricks>=6){
+          G.bricks=0;G.rows++;G.rowFlash=1;snd('row');
+          // Update cheer message on row complete
+          // (cheer message rotates on its own timer)
+          if(G.rows>=10){
+            G.rows=0;G.castles++;G.castleFlash=1;snd('castle');
+            G.castleList.push({corrupt:G.corruption});
+          }
+        }
+      }
+      const tot=G.workSec+G.monkeySec;G.corruption=tot>0?G.monkeySec/tot:0;
+    }
+
+    // Monkey roams freely during WORK (left/right only, ground level)
+    // Wander timer: change direction occasionally
+    G.monkeyWanderT=(G.monkeyWanderT||0)-dt;
+    if(G.monkeyWanderT<=0){
+      const r=Math.random();
+      if(r<0.55){
+        // walk to new spot
+        G.monkeyTargetX=Math.floor(monkeyS()*2+Math.random()*(SW-monkeyS()*16));
+        G.monkeyWanderT=2.0+Math.random()*3.0;
+      } else if(r<0.75){
+        // pause in place
+        G.monkeyTargetX=G.monkeyX;
+        G.monkeyWanderT=0.8+Math.random()*1.5;
+      } else {
+        // small jump! (one-shot)
+        G.monkeyJumpV=-monkeyS()*5;
+        G.monkeyWanderT=1.5+Math.random()*2.5;
+      }
+    }
+    // Apply gravity and keep on ground
+    G.monkeyJumpV+=monkeyS()*28*dt;
+    G.monkeyJump+=G.monkeyJumpV*dt;
+    if(G.monkeyJump>0){G.monkeyJump=0;G.monkeyJumpV=0;}
+    G.monkeyTargetX=Math.max(0,Math.min(SW-monkeyS()*14,G.monkeyTargetX));
+  }
+
+  document.getElementById('total-badge').textContent=`⏳ ${fmtRemain(Math.max(0,G.targetSec-(G.workSec+G.monkeySec)))}`;
+
+  // ── Worker speech bubble timing ──
+  if(G.mode==='work'||G.mode==='monkey'){
+    G.workerMsgTimer=Math.max(0,(G.workerMsgTimer||0)-dt);
+    G.workerSpeechT=Math.max(0,(G.workerSpeechT||0)-dt);
+    if(G.workerMsgTimer<=0) G.workerMsgVisible=false;
+    if(G.workerSpeechT<=0){
+      const pool=(G.mode==='monkey')?WORKER_SLEEP:WORKER_WORK;
+      G.workerMsg=pool[Math.floor(Math.random()*pool.length)];
+      G.workerMsgTimer=4.5;
+      G.workerMsgVisible=true;
+      G.workerSpeechT=9+Math.random()*9;
+    }
+  }
+  // ── Monkey cheer bubble timing (work mode only) ──
+  if(G.mode==='work'){
+    G.cheerMsgTimer=Math.max(0,(G.cheerMsgTimer||0)-dt);
+    G.cheerSpeechT=Math.max(0,(G.cheerSpeechT||0)-dt);
+    if(G.cheerMsgTimer<=0) G.cheerMsgVisible=false;
+    if(G.cheerSpeechT<=0){
+      G.cheerMsg=CHEERS[Math.floor(Math.random()*CHEERS.length)];
+      G.cheerMsgTimer=4.0;
+      G.cheerMsgVisible=true;
+      G.cheerSpeechT=8+Math.random()*10;
+    }
+    G.monkeyMsgVisible=false;
+  } else if(G.mode==='monkey'){
+    // ── Monkey fact bubble (monkey mode only) ──
+    G.monkeyMsgTimer=Math.max(0,(G.monkeyMsgTimer||0)-dt);
+    G.monkeySpeechT=Math.max(0,(G.monkeySpeechT||0)-dt);
+    if(G.monkeyMsgTimer<=0) G.monkeyMsgVisible=false;
+    if(G.monkeySpeechT<=0){
+      G.monkeyMsg=MONKEY_FACTS[Math.floor(Math.random()*MONKEY_FACTS.length)];
+      G.monkeyMsgTimer=5.0;
+      G.monkeyMsgVisible=true;
+      G.monkeySpeechT=9+Math.random()*9;
+    }
+    G.cheerMsgVisible=false;
+  } else {
+    G.cheerMsgVisible=false;
+    G.monkeyMsgVisible=false;
+  }
+
+  // End when WORK+MONKEY reaches the selected total
+  if((G.workSec+G.monkeySec)>=G.targetSec){endGame();return;}
+
+  drawTop();drawBot();
+}
+
+function spawnPeel(){
+  const ps=peelS();
+  const ms=monkeyS();
+  // start near monkey's raised hand in top screen
+  const startX=Math.round(G.monkeyX+11*ms);
+  const startY=Math.round(SH-12-14*ms+4*ms);
+  const landY=groundY()-ps*12-2;
+  // Throw down with a visible arc
+  const vx=(Math.random()*2-1)*90;
+  const vy=140+Math.random()*45;
+  const grav=420+Math.random()*80;
+  G.peels.push({
+    phase:'A',
+    gx:startX, gy:startY,
+    vx, vy, grav,
+    landY,
+    x:startX, fy:startY,
+    spd:85+Math.random()*55,
+    cleanT:0,
+  });
+  snd('peel');
+}
+
+function endGame(){
+  G.mode='ended';
+  const pur=Math.max(0,Math.floor((1-G.corruption)*100));
+  const tot=G.workSec+G.monkeySec;const eff=tot>0?Math.floor(G.workSec/tot*100):0;
+  let emoji,title,comment;
+  if(pur>=90){emoji='🏰';title='CATHEDRAL!';comment='Perfect focus!\nThe monkey never won.';}
+  else if(pur>=70){emoji='🏢';title='GREAT WORK!';comment='Strong effort.\nA few peels, but solid.';}
+  else if(pur>=50){emoji='🏚️';title='BANANA HALL';comment='Half won by monkey.\nPush harder next time.';}
+  else if(pur>=30){emoji='🍌';title='PEEL TOWER';comment='Mostly banana.\nClose to collapse.';}
+  else{emoji='💀';title='COLLAPSE!';comment='Monkey total victory.\nGet back to work!';}
+  document.getElementById('end-emoji').textContent=emoji;
+  document.getElementById('end-title').textContent=title;
+  document.getElementById('end-score').textContent=
+`WORK:      ${fmt(G.workSec)}
+MONKEY:    ${fmt(G.monkeySec)}
+PURITY:    ${pur}%
+EFFICIENCY:${eff}%
+CASTLES:   ${G.castles}
+PEELS:     ${G.peels.length}
+
+${comment}`;
+  document.getElementById('end-ov').classList.remove('hidden');
+  snd('win');drawTop();drawBot();
+}
+
+function fmt(s){return`${Math.floor(s/60).toString().padStart(2,'0')}:${Math.floor(s%60).toString().padStart(2,'0')}`;}
+function fmtRemain(s){
+  const v=Math.max(0,Math.ceil(s));
+  return`${Math.floor(v/60).toString().padStart(2,'0')}:${Math.floor(v%60).toString().padStart(2,'0')}`;
+}
+
+// Boot
+G=newGame(selectedMin);
+layout();
+G.idleX=Math.floor(SW*0.5);
+G.idleTargetX=Math.floor(SW*0.3);
+window.addEventListener('resize',layout);
+document.getElementById('likes-overlay').classList.add('visible');
+requestAnimationFrame(loop);
+
+// ── Likes (Cloudflare Worker) ─────────────────────────────────
+const LIKES_URL = 'https://bts-likes.takeshi-kawamoto.workers.dev';
+
+function fetchLikes(){
+  fetch(LIKES_URL)
+    .then(r=>r.json())
+    .then(d=>{
+      document.getElementById('likes-count').textContent = `❤️ ${d.likes} people like this`;
+    })
+    .catch(()=>{});
+}
+
+function sendLike(){
+  const btn = document.getElementById('likes-btn');
+  btn.disabled = true;
+  btn.textContent = '❤️ Thanks!';
+  // Spawn hearts from monkey
+  if(G && G.mode==='setup'){
+    G.likeAnim=3.0;
+    const ms=monkeyS();
+    const mx=G.idleX, my=SH-12-14*ms;
+    for(let i=0;i<8;i++){
+      G.hearts.push({
+        x:mx+ms*7+(Math.random()-0.5)*ms*12,
+        y:my+ms*(2+Math.random()*4),
+        a:1
+      });
+    }
+    snd('castle');
+  }
+  fetch(LIKES_URL, {method:'POST'})
+    .then(r=>r.json())
+    .then(d=>{
+      document.getElementById('likes-count').textContent = `❤️ ${d.likes} people like this`;
+    })
+    .catch(()=>{});
+}
+
+// Fetch on load, then every 30 seconds
+fetchLikes();
+setInterval(fetchLikes, 30000);
+
+
+</script>
+</body>
+</html>
