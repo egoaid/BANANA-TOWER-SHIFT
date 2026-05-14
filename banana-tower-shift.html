@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <!-- Copyright © 2026 Takeshi Kawamoto All rights reserved. | https://github.com/egoaid/BANANA-TOWER-SHIFT -->
+<!-- Version: 1.0 | Released: May 2026 -->
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -14,10 +15,10 @@
 <title>Banana Tower Shift</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
-html,body{width:100%;height:100%;overflow:hidden;background:#b8a888;font-family:'Courier New',Courier,monospace;}
+html,body{width:100%;height:100%;height:100dvh;overflow:hidden;background:#b8a888;font-family:'Courier New',Courier,monospace;}
 
 #device{
-  position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100dvh;
   background:radial-gradient(ellipse at 45% 35%,#ddd0b0 0%,#b8a888 100%);
   padding:env(safe-area-inset-top,0) env(safe-area-inset-right,0) env(safe-area-inset-bottom,0) env(safe-area-inset-left,0);
 }
@@ -48,17 +49,17 @@ html,body{width:100%;height:100%;overflow:hidden;background:#b8a888;font-family:
 #bottom-screen-bezel{background:#111;border-radius:7px;padding:5px;box-shadow:inset 0 0 12px rgba(0,0,0,.9),0 0 0 1px #2a2a2a;}
 #bottom-canvas-wrap{position:relative;overflow:hidden;border-radius:3px;}
 
-#controls-row{width:100%;display:flex;align-items:center;justify-content:space-between;padding:2px 2px;gap:8px;}
-.timer-badge{font-size:15px;font-weight:bold;letter-spacing:.5px;padding:5px 9px;border-radius:7px;font-family:'Courier New',monospace;min-width:80px;text-align:center;flex-shrink:0;}
+#controls-row{width:100%;display:flex;align-items:center;justify-content:center;padding:0;gap:0;}
+.timer-badge{font-size:15px;font-weight:bold;letter-spacing:.5px;padding:5px 9px;border-radius:7px;font-family:'Courier New',monospace;width:90px;text-align:center;flex-shrink:0;}
 /* (monkey/work badges removed from controls row) */
 
-#center-top{display:flex;align-items:center;justify-content:center;flex:1;}
-#total-badge{font-size:16px;min-width:96px;padding:6px 10px;border-radius:9px;background:#2a240f;color:#f8d800;border:2px solid #7a6a2a;}
+#center-top{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:3px;min-width:0;}
+#total-badge{font-size:16px;min-width:96px;padding:6px 10px;border-radius:9px;background:#2a240f;color:#f8d800;border:2px solid #7a6a2a;display:inline-flex;align-items:center;justify-content:center;gap:4px;white-space:nowrap;}
 
 #switch-btn{background:linear-gradient(180deg,#cc3030,#881818);color:#ffe8e8;border:none;border-radius:22px;width:110px;height:42px;font-family:'Courier New',monospace;font-size:14px;font-weight:bold;cursor:pointer;box-shadow:0 5px 0 #440000,inset 0 1px 0 rgba(255,200,200,.4);transition:transform .05s,box-shadow .05s;}
 #switch-btn:active{transform:translateY(3px);box-shadow:0 1px 0 #440000;}
 
-#btn-row{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;}
+#btn-row{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:5px;margin-bottom:-4px;}
 .sys-btn{background:linear-gradient(180deg,#ccc0a0,#aca080);color:#5a4a30;border:none;border-radius:16px;height:28px;padding:0 12px;font-family:'Courier New',monospace;font-size:11px;font-weight:bold;cursor:pointer;letter-spacing:.5px;box-shadow:0 3px 0 #887060,inset 0 1px 0 rgba(255,255,255,.5);transition:transform .05s,box-shadow .05s;display:flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap;line-height:1;}
 .sys-btn:active{transform:translateY(2px);box-shadow:0 1px 0 #887060;}
 #pause-btn{background:linear-gradient(180deg,#6090c8,#3060a0);color:#e0f0ff;box-shadow:0 3px 0 #204070;width:80px;}
@@ -80,27 +81,27 @@ html,body{width:100%;height:100%;overflow:hidden;background:#b8a888;font-family:
 .go-btn:active{transform:translateY(2px);}
 
 /* End overlay */
-#end-ov{background:#0a1a0a;color:#88dd66;}
-.end-score{font-size:11px;color:#88ee88;line-height:2.2;white-space:pre-line;font-weight:bold;}
-.end-emoji{font-size:36px;font-family:sans-serif;}
-.end-title-txt{font-size:14px;font-weight:bold;color:#aaffbb;letter-spacing:1px;}
+#end-ov{background:#080f08;color:#88dd66;gap:6px;}
+.end-emoji{font-size:34px;font-family:sans-serif;line-height:1;}
+.end-title-txt{font-size:15px;font-weight:bold;color:#aaffff;letter-spacing:2px;text-shadow:0 0 8px rgba(100,255,150,0.5);}
+.end-score{width:100%;}
+.score-grid{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:5px;width:100%;
+}
+.score-card{
+  background:#0e2010;border:1px solid #1a4020;
+  border-radius:5px;padding:5px 8px;
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+}
+.score-card.full{grid-column:1/-1;}
+.score-label{font-size:8px;color:#448844;letter-spacing:1px;font-family:'Courier New',monospace;}
+.score-value{font-size:14px;font-weight:bold;color:#88ffaa;font-family:'Courier New',monospace;}
+.score-bar-wrap{width:100%;height:5px;background:#0a1a0a;border-radius:3px;overflow:hidden;}
+.score-bar{height:100%;border-radius:3px;transition:width .5s;}
+.end-comment{font-size:10px;color:#559944;line-height:1.7;text-align:center;font-family:'Courier New',monospace;}
 
-#likes-overlay{
-  position:absolute;bottom:18px;left:50%;transform:translateX(-50%);
-  display:none;flex-direction:column;align-items:center;gap:6px;
-  z-index:200;pointer-events:auto;white-space:nowrap;
-}
-#likes-overlay.visible{display:flex;}
-#likes-btn{
-  background:linear-gradient(180deg,#e05080,#a02050);color:#ffe0ec;
-  border:none;border-radius:16px;height:32px;padding:0 18px;
-  font-family:'Courier New',monospace;font-size:14px;font-weight:bold;
-  cursor:pointer;letter-spacing:.5px;
-  box-shadow:0 3px 0 #600030,inset 0 1px 0 rgba(255,255,255,.3);
-  transition:transform .05s,box-shadow .05s;
-}
-#likes-btn:active{transform:translateY(2px);box-shadow:0 1px 0 #600030;}
-#likes-count{font-family:'Courier New',monospace;font-size:13px;font-weight:bold;color:#88ee88;text-shadow:0 1px 3px #000;}
+
 
 
 </style>
@@ -112,10 +113,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#b8a888;font-family:
       <div id="top-screen-bezel">
         <div id="top-canvas-wrap">
           <canvas id="top-cv"></canvas>
-          <div id="likes-overlay">
-            <button id="likes-btn" onclick="sendLike()">❤️ LIKE</button>
-            <div id="likes-count">❤️ ... people like this</div>
-          </div>
+
         </div>
       </div>
     </div>
@@ -126,7 +124,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:#b8a888;font-family:
           <canvas id="bot-cv"></canvas>
           <div class="screen-overlay" id="setup-ov">
             <div class="ov-title">🍌 BANANA<br>TOWER SHIFT</div>
-            <div class="ov-sub">Select work goal time</div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
+              <div class="ov-sub" style="letter-spacing:2px;">v1.0</div>
+              <div class="ov-sub">Select work goal time</div>
+            </div>
             <div class="time-selector">
               <button class="time-opt" data-min="10">10m</button>
               <button class="time-opt sel" data-min="30">30m</button>
@@ -140,7 +141,39 @@ html,body{width:100%;height:100%;overflow:hidden;background:#b8a888;font-family:
           <div class="screen-overlay hidden" id="end-ov">
             <div class="end-emoji" id="end-emoji">🏰</div>
             <div class="end-title-txt" id="end-title">COMPLETE!</div>
-            <div class="end-score" id="end-score"></div>
+            <div class="end-score">
+              <div class="score-grid" id="score-grid">
+                <div class="score-card">
+                  <span class="score-label">🏗 WORK</span>
+                  <span class="score-value" id="r-work">00:00</span>
+                </div>
+                <div class="score-card">
+                  <span class="score-label">🐒 MONKEY</span>
+                  <span class="score-value" id="r-monkey">00:00</span>
+                </div>
+                <div class="score-card">
+                  <span class="score-label">PURITY</span>
+                  <span class="score-value" id="r-purity">0%</span>
+                  <div class="score-bar-wrap"><div class="score-bar" id="r-purity-bar" style="width:0%;background:#44cc66;"></div></div>
+                </div>
+                <div class="score-card">
+                  <span class="score-label">EFFICIENCY</span>
+                  <span class="score-value" id="r-eff">0%</span>
+                  <div class="score-bar-wrap"><div class="score-bar" id="r-eff-bar" style="width:0%;background:#44aaff;"></div></div>
+                </div>
+                <div class="score-card">
+                  <span class="score-label">🏰 CASTLES</span>
+                  <span class="score-value" id="r-castles">0</span>
+                </div>
+                <div class="score-card">
+                  <span class="score-label">🍌 PEELS</span>
+                  <span class="score-value" id="r-peels">0</span>
+                </div>
+                <div class="score-card full">
+                  <span class="end-comment" id="r-comment"></span>
+                </div>
+              </div>
+            </div>
             <button class="go-btn" onclick="resetGame()">▶ RETRY</button>
           </div>
         </div>
@@ -372,7 +405,8 @@ function updateUiTimerFont(){
   if(Number.isFinite(v)&&v>0) UI_TIMER_FS=v;
 }
 function layout() {
-  const vw=window.innerWidth, vh=window.innerHeight;
+  const vw=window.innerWidth;
+  const vh=(window.visualViewport?window.visualViewport.height:window.innerHeight);
   const resH=13+78+36+62;
   const availH=vh-resH, availW=vw-40;
   const asp=4/3;
@@ -559,11 +593,11 @@ function snd(name){
 }
 
 // ── UI wiring ─────────────────────────────────────────────────
-document.getElementById('mute-btn').onclick=()=>{muted=!muted;document.getElementById('mute-btn').textContent=muted?'🔇 MUTE':'🔊 SOUND';};
-document.getElementById('reset-btn').onclick=()=>resetGame();
+document.getElementById('mute-btn').onclick=()=>{muted=!muted;document.getElementById('mute-btn').textContent=muted?'🔇 MUTE':'🔊 SOUND';if(!muted)snd('click');};
+document.getElementById('reset-btn').onclick=()=>{snd('click');resetGame();};
 document.getElementById('switch-btn').onclick=()=>switchMode();
 document.getElementById('go-btn').onclick=()=>startGame();
-document.getElementById('pause-btn').onclick=()=>togglePause();
+document.getElementById('pause-btn').onclick=()=>{snd('click');togglePause();};
 document.querySelectorAll('.time-opt').forEach(b=>{
   if(!b.dataset.min)return;
   b.onclick=()=>{
@@ -629,7 +663,6 @@ function resetGame(){
   AC.resume();
   document.getElementById('end-ov').classList.add('hidden');
   document.getElementById('setup-ov').classList.remove('hidden');
-  document.getElementById('likes-overlay').classList.add('visible');
   G=newGame(selectedMin);layout();
 }
 function togglePause(){
@@ -1401,14 +1434,57 @@ function drawPeel(ctx,ox,oy,s){
 //  SPRITE: CASTLE ICON  (small)
 // ══════════════════════════════════════════════════════════════
 function drawCastleIcon(ctx,ox,oy,s,corrupt){
-  const cA=corrupt>0.5?G4.brkBad:G4.csA, cH=corrupt>0.5?G4.brkBadB:G4.csH;
-  const fl=corrupt>0.5?G4.banana:G4.g1;
-  px(ctx,ox,oy+2*s,3*s,10*s,cA);px(ctx,ox,oy,2*s,2*s,cH);px(ctx,ox,oy+2*s,s,10*s,cH);
-  px(ctx,ox+3*s,oy+4*s,6*s,8*s,cA);px(ctx,ox+4*s,oy+3*s,4*s,s,cH);px(ctx,ox+3*s,oy+4*s,s,8*s,cH);
-  px(ctx,ox+9*s,oy+2*s,3*s,10*s,cA);px(ctx,ox+10*s,oy,2*s,2*s,cH);px(ctx,ox+9*s,oy+2*s,s,10*s,cH);
-  px(ctx,ox+5*s,oy+8*s,2*s,4*s,G4.g3);px(ctx,ox+4*s,oy+9*s,4*s,3*s,G4.g3);
-  px(ctx,ox+5*s,oy+5*s,2*s,2*s,fl);
-  px(ctx,ox+5*s,oy-s,s,3*s,cH);px(ctx,ox+6*s,oy-s,2*s,s,fl);
+  // Colours: match building (warm light grey) or corrupted (banana-tinted)
+  const cA  = corrupt>0.5 ? G4.brkBad  : G4.brkA;   // main face
+  const cHi = corrupt>0.5 ? G4.brkBadB : G4.brkB;   // top highlight
+  const cSh = corrupt>0.5 ? '#4a3808'  : G4.brkShd; // shadow
+  const cLt = corrupt>0.5 ? G4.brkBad  : G4.brkLit; // street-lamp right
+  const cMt = corrupt>0.5 ? '#6a5010'  : G4.brkMort;// mortar/gate
+  const fl  = corrupt>0.5 ? G4.banana  : '#f0d050';  // flag/window
+
+  // ── Left tower ──
+  px(ctx,ox,       oy+2*s, 3*s,10*s, cA);   // face
+  px(ctx,ox,       oy,     2*s,2*s,  cHi);  // battlement top highlight
+  px(ctx,ox,       oy+2*s, s,  10*s, cHi);  // left highlight
+  px(ctx,ox+2*s,   oy+2*s, s,  10*s, cSh);  // right shadow
+  px(ctx,ox,       oy+10*s,3*s,2*s,  cSh);  // base shadow
+
+  // ── Main body ──
+  px(ctx,ox+3*s,   oy+4*s, 6*s,8*s,  cA);
+  px(ctx,ox+4*s,   oy+3*s, 4*s,s,    cHi);  // top highlight
+  px(ctx,ox+3*s,   oy+4*s, s,  8*s,  cHi);  // left highlight
+  px(ctx,ox+8*s,   oy+4*s, s,  8*s,  cSh);  // right shadow
+  px(ctx,ox+3*s,   oy+11*s,6*s,s,    cSh);  // base shadow
+  // Street-lamp warm glow on right side
+  px(ctx,ox+7*s,   oy+4*s, 2*s,8*s,  cLt);
+
+  // ── Right tower ──
+  px(ctx,ox+9*s,   oy+2*s, 3*s,10*s, cA);
+  px(ctx,ox+10*s,  oy,     2*s,2*s,  cHi);
+  px(ctx,ox+9*s,   oy+2*s, s,  10*s, cHi);
+  px(ctx,ox+11*s,  oy+2*s, s,  10*s, cSh);
+  px(ctx,ox+9*s,   oy+10*s,3*s,2*s,  cSh);
+
+  // ── Gate (dark opening) ──
+  px(ctx,ox+5*s,   oy+8*s, 2*s,4*s,  cMt);
+  px(ctx,ox+4*s,   oy+9*s, 4*s,3*s,  cMt);
+
+  // ── Window (lit warm) ──
+  px(ctx,ox+5*s,   oy+5*s, 2*s,2*s,  fl);
+  ctx.globalAlpha=0.3;
+  px(ctx,ox+4*s,   oy+4*s, 4*s,4*s,  fl);  // glow around window
+  ctx.globalAlpha=1;
+
+  // ── Flag ──
+  px(ctx,ox+5*s,   oy-s,   s,  3*s,  cHi); // pole
+  px(ctx,ox+6*s,   oy-s,   2*s,s,    fl);  // flag
+
+  // ── Mortar lines (horizontal) ──
+  for(let my=0;my<3;my++){
+    px(ctx,ox,     oy+4*s+my*2*s, 3*s,1, cMt); // left tower
+    px(ctx,ox+9*s, oy+4*s+my*2*s, 3*s,1, cMt); // right tower
+    px(ctx,ox+3*s, oy+6*s+my*2*s, 6*s,1, cMt); // body
+  }
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -1948,15 +2024,6 @@ function loop(ts){
   G.fc++;
   G.brickFlash=Math.max(0,G.brickFlash-dt*3);
 
-  // ── Show likes-overlay only in setup ──
-  {
-    const lov=document.getElementById('likes-overlay');
-    if(lov){
-      if(G.mode==='setup') lov.classList.add('visible');
-      else lov.classList.remove('visible');
-    }
-  }
-
   // ── SETUP MODE: idle monkey logic ──
   if(G.mode==='setup'){
     const ms2=monkeyS();
@@ -2218,15 +2285,16 @@ function endGame(){
   else{emoji='💀';title='COLLAPSE!';comment='Monkey total victory.\nGet back to work!';}
   document.getElementById('end-emoji').textContent=emoji;
   document.getElementById('end-title').textContent=title;
-  document.getElementById('end-score').textContent=
-`WORK:      ${fmt(G.workSec)}
-MONKEY:    ${fmt(G.monkeySec)}
-PURITY:    ${pur}%
-EFFICIENCY:${eff}%
-CASTLES:   ${G.castles}
-PEELS:     ${G.peels.length}
-
-${comment}`;
+  document.getElementById('r-work').textContent=fmt(G.workSec);
+  document.getElementById('r-monkey').textContent=fmt(G.monkeySec);
+  document.getElementById('r-purity').textContent=pur+'%';
+  document.getElementById('r-purity-bar').style.width=pur+'%';
+  document.getElementById('r-purity-bar').style.background=pur>=70?'#44cc66':pur>=40?'#ccaa22':'#cc4422';
+  document.getElementById('r-eff').textContent=eff+'%';
+  document.getElementById('r-eff-bar').style.width=eff+'%';
+  document.getElementById('r-castles').textContent=G.castles;
+  document.getElementById('r-peels').textContent=G.trashCount;
+  document.getElementById('r-comment').textContent=comment.replace('\n',' ');
   document.getElementById('end-ov').classList.remove('hidden');
   snd('win');drawTop();drawBot();
 }
@@ -2243,50 +2311,10 @@ layout();
 G.idleX=Math.floor(SW*0.5);
 G.idleTargetX=Math.floor(SW*0.3);
 window.addEventListener('resize',layout);
-document.getElementById('likes-overlay').classList.add('visible');
+if(window.visualViewport) window.visualViewport.addEventListener('resize',layout);
 requestAnimationFrame(loop);
 
-// ── Likes (Cloudflare Worker) ─────────────────────────────────
-const LIKES_URL = 'https://bts-likes.takeshi-kawamoto.workers.dev';
 
-function fetchLikes(){
-  fetch(LIKES_URL)
-    .then(r=>r.json())
-    .then(d=>{
-      document.getElementById('likes-count').textContent = `❤️ ${d.likes} people like this`;
-    })
-    .catch(()=>{});
-}
-
-function sendLike(){
-  const btn = document.getElementById('likes-btn');
-  btn.disabled = true;
-  btn.textContent = '❤️ Thanks!';
-  // Spawn hearts from monkey
-  if(G && G.mode==='setup'){
-    G.likeAnim=3.0;
-    const ms=monkeyS();
-    const mx=G.idleX, my=SH-12-14*ms;
-    for(let i=0;i<8;i++){
-      G.hearts.push({
-        x:mx+ms*7+(Math.random()-0.5)*ms*12,
-        y:my+ms*(2+Math.random()*4),
-        a:1
-      });
-    }
-    snd('castle');
-  }
-  fetch(LIKES_URL, {method:'POST'})
-    .then(r=>r.json())
-    .then(d=>{
-      document.getElementById('likes-count').textContent = `❤️ ${d.likes} people like this`;
-    })
-    .catch(()=>{});
-}
-
-// Fetch on load, then every 30 seconds
-fetchLikes();
-setInterval(fetchLikes, 30000);
 
 
 </script>
