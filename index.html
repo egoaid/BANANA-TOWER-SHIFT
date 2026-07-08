@@ -9,7 +9,15 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="BTS">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#c8b898">
+<meta name="theme-color" content="#1a0a00">
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" type="image/png" sizes="32x32" href="./icons/favicon-32.png">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+<meta property="og:title" content="Banana Tower Shift">
+<meta property="og:description" content="Procrastination monkey vs. architect – chess timer productivity game">
+<meta property="og:image" content="./icons/og-image.png">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
 
 
 <title>Banana Tower Shift</title>
@@ -187,82 +195,8 @@ html,body{width:100%;height:100%;height:100dvh;overflow:hidden;background:#b8a88
 </div>
 
 <script>
-function makeMonkeyFacePng(size){
-  const cv=document.createElement('canvas');
-  cv.width=cv.height=size;
-  const ctx=cv.getContext('2d');
-  ctx.imageSmoothingEnabled=false;
-  const g0='#e8f8c8';
-  const fur='#7a4818', furH='#a06828', furD='#4a2808';
-  const face='#c88050', faceH='#e0a070';
-  const eye='#080808';
-  const N=16;
-  const s=Math.floor(size/N);
-  const off=Math.floor((size-s*N)/2);
-  const px2=(x,y,w,h,c)=>{ctx.fillStyle=c;ctx.fillRect(off+x*s,off+y*s,w*s,h*s);};
-  px2(0,0,16,16,'#081808');
-  px2(0,0,16,1,'#386830');px2(0,15,16,1,'#204820');
-  px2(0,0,1,16,'#204820');px2(15,0,1,16,'#081808');
-  const bx=1, by=0;
-  [[10,6],[11,7],[11,8],[10,9],[9,10]].forEach(([tx,ty])=>px2(bx+tx,by+ty,1,1,fur));
-  px2(bx+10,by+6,1,1,furH);
-  px2(bx+2,by+8,9,4,fur);
-  px2(bx+2,by+8,9,1,furH);
-  px2(bx+3,by+9,7,2,'#b87048');
-  px2(bx+2,by+1,9,6,fur);
-  px2(bx+3,by+0,7,1,fur);
-  px2(bx+3,by+7,7,1,fur);
-  px2(bx+1,by+2,2,4,fur);
-  px2(bx+10,by+2,2,4,fur);
-  px2(bx+3,by+1,7,1,furH);
-  px2(bx+3,by+2,7,4,face);
-  px2(bx+4,by+1,5,1,face);
-  px2(bx+3,by+6,7,1,faceH);
-  px2(bx+1,by+2,2,2,fur);px2(bx+1,by+3,1,1,face);
-  px2(bx+10,by+2,2,2,fur);px2(bx+11,by+3,1,1,face);
-  px2(bx+4,by+3,2,2,eye);px2(bx+4,by+3,1,1,g0);
-  px2(bx+8,by+3,2,2,eye);px2(bx+8,by+3,1,1,g0);
-  px2(bx+6,by+5,2,1,furD);
-  px2(bx+4,by+6,1,1,furD);
-  px2(bx+5,by+7,3,1,furD);
-  px2(bx+8,by+6,1,1,furD);
-  px2(bx+5,by+7,3,1,g0);
-  px2(bx+1,by+10,2,1,fur);
-  px2(bx+10,by+10,2,1,fur);
-  px2(bx+3,by+12,3,2,fur);
-  px2(bx+7,by+12,3,2,fur);
-  px2(bx+3,by+13,4,1,face);
-  px2(bx+7,by+13,4,1,face);
-  return cv.toDataURL('image/png');
-}
-
-const icon192=makeMonkeyFacePng(192);
-const icon512=makeMonkeyFacePng(512);
-
-const mfObj={
-  name:'Banana Tower Shift',
-  short_name:'BTS',
-  description:'Procrastination monkey vs. architect – chess timer productivity game',
-  start_url:'./banana-tower-shift.html',
-  scope:'./',
-  display:'fullscreen',
-  orientation:'portrait',
-  background_color:'#0a0a0a',
-  theme_color:'#1a0a00',
-  icons:[
-    {src:icon192,sizes:'192x192',type:'image/png'},
-    {src:icon512,sizes:'512x512',type:'image/png'}
-  ]
-};
-const mb=new Blob([JSON.stringify(mfObj)],{type:'application/json'});
-const ml=document.createElement('link');ml.rel='manifest';ml.href=URL.createObjectURL(mb);document.head.appendChild(ml);
-
-const il=document.createElement('link');il.rel='apple-touch-icon';il.href=icon192;document.head.appendChild(il);
-const fav=document.createElement('link');fav.rel='icon';fav.href=icon192;document.head.appendChild(fav);
-const _sw="const CACHE = 'bts-v2';\nconst APP_SHELL = './banana-tower-shift.html';\nself.addEventListener('install', e => {\n  e.waitUntil((async()=>{\n    const c=await caches.open(CACHE);\n    await c.addAll([APP_SHELL]);\n    self.skipWaiting();\n  })());\n});\nself.addEventListener('activate', e => {\n  e.waitUntil((async()=>{\n    const keys=await caches.keys();\n    await Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)));\n    self.clients.claim();\n  })());\n});\nself.addEventListener('fetch', e => {\n  const req=e.request;\n  if(req.mode==='navigate'){\n    e.respondWith((async()=>{\n      const cached=await caches.match(APP_SHELL);\n      if(cached) return cached;\n      try{ return await fetch(req); }catch{ return cached; }\n    })());\n    return;\n  }\n  e.respondWith(caches.match(req).then(cached => cached || fetch(req)));\n});\n";
-if('serviceWorker' in navigator){
-  const _sb=new Blob([_sw],{type:'text/javascript'});
-  navigator.serviceWorker.register(URL.createObjectURL(_sb)).catch(()=>{});
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(() => {});
 }
 </script>
 <script>

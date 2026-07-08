@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" shape-rendering="crispEdges">
+  <!-- background -->
+  <rect x="0" y="0" width="16" height="16" fill="#081808"/>
+  <!-- border top/bottom/left/right -->
+  <rect x="0" y="0" width="16" height="1" fill="#386830"/>
+  <rect x="0" y="15" width="16" height="1" fill="#204820"/>
+  <rect x="0" y="0" width="1" height="16" fill="#204820"/>
+  <rect x="15" y="0" width="1" height="16" fill="#081808"/>
+
+  <!-- tail (bx=1) -->
+  <rect x="11" y="6" width="1" height="1" fill="#7a4818"/>
+  <rect x="12" y="7" width="1" height="1" fill="#7a4818"/>
+  <rect x="12" y="8" width="1" height="1" fill="#7a4818"/>
+  <rect x="11" y="9" width="1" height="1" fill="#7a4818"/>
+  <rect x="10" y="10" width="1" height="1" fill="#7a4818"/>
+  <rect x="11" y="6" width="1" height="1" fill="#a06828"/>
+
+  <!-- body -->
+  <rect x="3" y="8" width="9" height="4" fill="#7a4818"/>
+  <rect x="3" y="8" width="9" height="1" fill="#a06828"/>
+  <rect x="4" y="9" width="7" height="2" fill="#b87048"/>
+
+  <!-- head fur -->
+  <rect x="3" y="1" width="9" height="6" fill="#7a4818"/>
+  <rect x="4" y="0" width="7" height="1" fill="#7a4818"/>
+  <rect x="4" y="7" width="7" height="1" fill="#7a4818"/>
+  <rect x="2" y="2" width="2" height="4" fill="#7a4818"/>
+  <rect x="11" y="2" width="2" height="4" fill="#7a4818"/>
+
+  <!-- head highlight -->
+  <rect x="4" y="1" width="7" height="1" fill="#a06828"/>
+
+  <!-- face -->
+  <rect x="4" y="2" width="7" height="4" fill="#c88050"/>
+  <rect x="5" y="1" width="5" height="1" fill="#c88050"/>
+  <rect x="4" y="6" width="7" height="1" fill="#e0a070"/>
+
+  <!-- ear details -->
+  <rect x="2" y="2" width="2" height="2" fill="#7a4818"/>
+  <rect x="2" y="3" width="1" height="1" fill="#c88050"/>
+  <rect x="11" y="2" width="2" height="2" fill="#7a4818"/>
+  <rect x="12" y="3" width="1" height="1" fill="#c88050"/>
+
+  <!-- eyes -->
+  <rect x="5" y="3" width="2" height="2" fill="#080808"/>
+  <rect x="5" y="3" width="1" height="1" fill="#e8f8c8"/>
+  <rect x="9" y="3" width="2" height="2" fill="#080808"/>
+  <rect x="9" y="3" width="1" height="1" fill="#e8f8c8"/>
+
+  <!-- nose -->
+  <rect x="7" y="5" width="2" height="1" fill="#4a2808"/>
+
+  <!-- mouth -->
+  <rect x="5" y="6" width="1" height="1" fill="#4a2808"/>
+  <rect x="6" y="7" width="3" height="1" fill="#4a2808"/>
+  <rect x="9" y="6" width="1" height="1" fill="#4a2808"/>
+  <rect x="6" y="7" width="3" height="1" fill="#e8f8c8"/>
+
+  <!-- arms -->
+  <rect x="2" y="10" width="2" height="1" fill="#7a4818"/>
+  <rect x="11" y="10" width="2" height="1" fill="#7a4818"/>
+
+  <!-- legs -->
+  <rect x="4" y="12" width="3" height="2" fill="#7a4818"/>
+  <rect x="8" y="12" width="3" height="2" fill="#7a4818"/>
+  <rect x="4" y="13" width="4" height="1" fill="#c88050"/>
+  <rect x="8" y="13" width="4" height="1" fill="#c88050"/>
+</svg>
