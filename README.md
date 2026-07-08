@@ -3,6 +3,8 @@
 **Focus Timer & Procrastination Tracker**
 集中タイマー & さぼり記録アプリ
 
+![Banana Tower Shift](./icons/og-image.png)
+
 ---
 
 ## English
