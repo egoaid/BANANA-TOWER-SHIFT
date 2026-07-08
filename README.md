@@ -5,6 +5,8 @@
 
 ![Banana Tower Shift](./icons/og-image.png)
 
+**▶ Try it live: [https://egoaid.github.io/BANANA-TOWER-SHIFT/](https://egoaid.github.io/BANANA-TOWER-SHIFT/)**
+
 ---
 
 ## English
